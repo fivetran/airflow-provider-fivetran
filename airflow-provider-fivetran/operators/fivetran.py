@@ -1,12 +1,14 @@
 import logging
-
-from airflow.models import BaseOperator
-from airflow.plugins_manager import AirflowPlugin
-from airflow.utils.decorators import apply_defaults
-import requests
 import json
 import time
+
+import requests
 import pendulum
+
+from airflow.models import BaseOperator
+from airflow.utils.decorators import apply_defaults
+
+# from airflow.plugins_manager import AirflowPlugin
 
 
 log = logging.getLogger(__name__)
@@ -14,20 +16,25 @@ log = logging.getLogger(__name__)
 
 class FivetranOperator(BaseOperator):
     """
-    Insert your operator documentation here. This operator inherits from the BaseOperator and prints "Hello World!" and whatever string that I choose to pass as an argument.
+    FivetranOperator starts the sync job of a Fivetran connector, and will
+    exit when the sync is complete or raise an exception otherwise.
 
-    Here is where we'll include our params
-    :param str my_operator_param: A random string to pass to the operator that will be printed after "Hello World!"
+    :param str api_key: Fivetran API key, found in Account Settings
+    :param str api_secret: Fivetran API secret, found in Account Settings.
+    :param str connector_id: ID of the Fivetran connector to sync, found on the Connector settings page.
+    :param int poll_status_every_n_seconds: A lower value means more frequent API polling for sync
+                status; 3 seconds is about the minimum before hitting rate limits.
     """
 
-
     @apply_defaults
-    def __init__(self, 
-		 api_key=None,
-		 api_secret=None,
-		 connector_id=None, 
-		 poll_status_every_n_seconds: int = 15,
-		 **kwargs):
+    def __init__(
+        self,
+        api_key=None,
+        api_secret=None,
+        connector_id=None,
+        poll_status_every_n_seconds: int = 15,
+        **kwargs
+    ):
         """
         An invocation of `run` will attempt to start a sync job for the specified `connector_id`. `run`
         will poll Fivetran for connector status, and will only complete when the sync has completed or
@@ -46,8 +53,6 @@ class FivetranOperator(BaseOperator):
         self.connector_id = connector_id
         self.poll_status_every_n_seconds = poll_status_every_n_seconds
         super().__init__(**kwargs)
-	
-
 
         if not self.connector_id:
             raise ValueError("Value for parameter `connector_id` must be provided.")
@@ -55,18 +60,16 @@ class FivetranOperator(BaseOperator):
             raise ValueError("Value for parameter `api_key` must be provided.")
         if not self.api_secret:
             raise ValueError("Value for parameter `api_secret` must be provided.")
-  
 
     def parse_timestamp(self, api_time):
-            """Returns either the pendulum-parsed actual timestamp or
-            a very out-of-date timestamp if not set
-            """
-            return (
-                pendulum.parse(api_time)
-                if api_time is not None
-                else pendulum.from_timestamp(-1)
-            )
-   
+        """Returns either the pendulum-parsed actual timestamp or
+        a very out-of-date timestamp if not set
+        """
+        return (
+            pendulum.parse(api_time)
+            if api_time is not None
+            else pendulum.from_timestamp(-1)
+        )
 
     def execute(self, context):
 
@@ -98,7 +101,9 @@ class FivetranOperator(BaseOperator):
                 'Fivetran connector "{}" not correctly configured, status: {}; '
                 + "please complete setup at {}"
             )
-            raise ValueError(EXC_SETUP.format(self.connector_id, setup_state, URL_SETUP))
+            raise ValueError(
+                EXC_SETUP.format(self.connector_id, setup_state, URL_SETUP)
+            )
         # We need to know the previous job's completion time to know if the job succeeded or failed
         succeeded_at = self.parse_timestamp(connector_details["succeeded_at"])
         failed_at = self.parse_timestamp(connector_details["failed_at"])
@@ -119,7 +124,9 @@ class FivetranOperator(BaseOperator):
             auth=(self.api_key, self.api_secret),
         )
         # Start connector sync
-        resp = session.post(URL_CONNECTOR + "/force", auth=(self.api_key, self.api_secret))
+        resp = session.post(
+            URL_CONNECTOR + "/force", auth=(self.api_key, self.api_secret)
+        )
 
         loop: bool = True
         while loop:
