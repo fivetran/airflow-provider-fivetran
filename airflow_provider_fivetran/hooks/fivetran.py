@@ -18,9 +18,6 @@ log = logging.getLogger(__name__)
 
 class FivetranHook(BaseHook):  # noqa
     """
-    Interact with Databricks.
-    :param databricks_conn_id: The name of the databricks connection to use.
-    :type databricks_conn_id: str
     :param timeout_seconds: The amount of time in seconds the requests library
         will wait before timing-out.
     :type timeout_seconds: int
