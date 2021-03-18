@@ -1,3 +1,4 @@
+from typing import Any, Dict
 from time import sleep
 from urllib.parse import urlparse
 
@@ -30,8 +31,36 @@ class FivetranHook(BaseHook):  # noqa
     """
 
     conn_name_attr = 'fivetran_conn_id'
-    conn_type = 'http'
+    default_conn_name = 'fivetran_default'
+    conn_type = 'fivetran'
     hook_name = 'Fivetran'
+
+    @staticmethod
+    def get_connection_form_widgets() -> Dict[str, Any]:
+        """Returns connection widgets to add to connection form"""
+        from flask_appbuilder.fieldwidgets import BS3PasswordFieldWidget
+        from flask_babel import lazy_gettext
+        from wtforms import PasswordField
+
+        return {
+            "extra__fivetran__token": PasswordField(
+                lazy_gettext('Token'), widget=BS3PasswordFieldWidget()
+            ),
+        }
+
+    @staticmethod
+    def get_ui_field_behaviour() -> Dict:
+        """Returns custom field behaviour"""
+        return {
+            "hidden_fields": ['schema', 'port', 'extra'],
+            "relabeling": {},
+            "placeholders": {
+                'host': 'fivetran hostname',
+                'login': 'fivetran username',
+                'password': 'fivetran password',
+                'extra__fivetran__token': 'fivetran auth token (can be used instead of login/password)',
+            },
+        }
 
     def __init__(
         self,
@@ -65,7 +94,7 @@ class FivetranHook(BaseHook):  # noqa
 
         if 'token' in self.fivetran_conn.extra_dejson:
             self.log.info('Using token auth. ')
-            auth = _TokenAuth(self.fivetran_conn.extra_dejson['token'])
+            auth = _TokenAuth(self.fivetran_conn.extra_dejson['extra__fivetran__token'])
             if 'host' in self.fivetran_conn.extra_dejson:
                 host = self._parse_host(self.fivetran_conn.extra_dejson['host'])
             else:
