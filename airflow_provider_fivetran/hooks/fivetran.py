@@ -274,7 +274,6 @@ class FivetranHook(BaseHook):
             self.log.info('connector_id: {}'.format(connector_id))
             return True
         else:
-            self.log.info('still syncing "{}"'.format(connector_id))
             return False
 
     def _parse_timestamp(self, api_time):
