@@ -55,4 +55,3 @@ class FivetranOperator(BaseOperator):
         hook.check_connector(self.connector_id)
         hook.set_manual_schedule(self.connector_id)
         hook.start_fivetran_sync(self.connector_id)
-        hook.poll_fivetran_sync(self.connector_id, self.poll_frequency)
