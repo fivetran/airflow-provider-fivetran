@@ -9,7 +9,8 @@ from airflow.utils.decorators import apply_defaults
 from typing import Any, Dict, List, Optional, Union
 
 
-from hooks.fivetran import FivetranHook
+# from hooks.fivetran import FivetranHook
+from airflow_provider_fivetran.hooks.fivetran import FivetranHook
 
 # from airflow.plugins_manager import AirflowPlugin
 

@@ -2,7 +2,7 @@ import os
 import airflow
 from airflow import DAG
 from airflow.models import Variable
-from operators.fivetran import FivetranOperator
+from airflow_provider_fivetran.operators.fivetran import FivetranOperator
 
 
 

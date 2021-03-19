@@ -2,8 +2,10 @@ import os
 import airflow
 from airflow import DAG
 from airflow.models import Variable
-from operators.fivetran import FivetranOperator
-from operators.ssh import SSHOperator
+from airflow_provider_fivetran.operators.fivetran import FivetranOperator
+# from operators.ssh import SSHOperator
+from airflow.providers.ssh.operators.ssh import SSHOperator
+
 
 default_args = {
     "owner": "Airflow",
