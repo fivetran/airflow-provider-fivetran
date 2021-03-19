@@ -11,9 +11,6 @@ from typing import Any, Dict, List, Optional, Union
 
 from airflow_provider_fivetran.hooks.fivetran import FivetranHook
 
-REGISTRY_LINK = "https://registry.astronomer.io/providers/{provider}/modules/{operator}"
-
-
 log = logging.getLogger(__name__)
 
 class RegistryLink(BaseOperatorLink):
@@ -23,8 +20,9 @@ class RegistryLink(BaseOperatorLink):
 
     def get_link(self, operator, dttm):
         """Get link to registry page."""
-    
-        return REGISTRY_LINK.format(provider='fivetran', operator='fivetranoperator')
+
+        registry_link = "https://registry.astronomer.io/providers/{provider}/modules/{operator}"
+        return registry_link.format(provider='fivetran', operator='fivetranoperator')
 
 
 class FivetranOperator(BaseOperator):
