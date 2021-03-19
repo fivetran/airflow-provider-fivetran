@@ -255,14 +255,13 @@ class FivetranHook(BaseHook):
         # The only way to tell if a sync failed is to check if its latest
         # failed_at value is greater than then last known "sync completed at" value.
         if failed_at > previous_completed_at:
-                raise ValueError(
-                    'Fivetran sync for connector "{}" failed; please see logs at {}'.format(
-                        connector_id, URL_LOGS
-                    )
-                )
-
+            raise AirflowException(
+                f'Fivetran sync for connector "{connector_id}" failed; '
+                f"please see logs at "
+                f"{self._connector_ui_url_logs(service_name, schema_name)}"
+        
         sync_state = connector_details["status"]["sync_state"]
-        log.info(
+        self.log.info(
             'Connector "{}" current sync_state = {}'.format(
                 connector_id, sync_state
             )
@@ -271,11 +270,11 @@ class FivetranHook(BaseHook):
         # Check if sync started by FivetranOperator has finished
         # indicated by new 'succeeded_at' timestamp
         if current_completed_at > previous_completed_at:
-            log.info('succeeded_at: {}'.format(succeeded_at.to_iso8601_string()))
-            log.info('connector_id: {}'.format(connector_id))
+            self.log.info('succeeded_at: {}'.format(succeeded_at.to_iso8601_string()))
+            self.log.info('connector_id: {}'.format(connector_id))
             return True
         else:
-            log.info('still syncing "{}"'.format(connector_id))
+            self.log.info('still syncing "{}"'.format(connector_id))
             return False
 
     def _parse_timestamp(self, api_time):

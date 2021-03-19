@@ -2,8 +2,8 @@ import os
 import airflow
 from airflow import DAG
 from airflow.models import Variable
-from operators.fivetran import FivetranOperator
-from sensors.fivetran import FivetranSensor
+from airflow_provider_fivetran.hooks.fivetran import FivetranOperator
+from airflow_provider_fivetran.hooks.fivetran import FivetranSensor
 
 
 default_args = {
