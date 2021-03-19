@@ -7,7 +7,6 @@ from requests import PreparedRequest, exceptions as requests_exceptions
 from requests.auth import AuthBase
 import pendulum
 
-# from airflow import __version__
 from airflow.exceptions import AirflowException
 from airflow.hooks.base_hook import BaseHook
 
@@ -221,61 +220,61 @@ class FivetranHook(BaseHook):
 
     def get_last_sync(self, connector_id):
         """
-        Get the last time Fivetran connector completed a sync. Sensor will monitor until this field updates.
+        Get the last time Fivetran connector completed a sync.
+            Used with FivetranSensor to monitor sync completion status.
+
         :param connector_id: Fivetran connector_id, found in connector settings
             page in the Fivetran user interface.
         :type connector_id: str
         """
 
-        resp = self._do_api_call(('GET',connector_id))
+        resp = self._do_api_call(("GET", connector_id))
         connector_details = resp["data"]
         succeeded_at = self._parse_timestamp(connector_details["succeeded_at"])
         failed_at = self._parse_timestamp(connector_details["failed_at"])
         return succeeded_at if succeeded_at > failed_at else failed_at
-    
-    def get_sync_status(self, connector_id, previous_completed_at):    
+
+    def get_sync_status(self, connector_id, previous_completed_at):
         """
         For sensor, return True if connector's 'succeeded_at' field has updated.
         :param connector_id: Fivetran connector_id, found in connector settings
             page in the Fivetran user interface.
         :type connector_id: str
-        :param previous_completed_at: The last time the connector ran, collected on Sensor initialization.
+        :param previous_completed_at: The last time the connector ran, collected on Sensor
+            initialization.
         :type previous_completed_at: pendulum.datetime.DateTime
         """
         # @todo Need logic here to tell if the sync is not running at all and not
         # likely to run in the near future.
-        resp = self._do_api_call(('GET',connector_id))
+        resp = self._do_api_call(("GET", connector_id))
         connector_details = resp["data"]
         succeeded_at = self._parse_timestamp(connector_details["succeeded_at"])
         failed_at = self._parse_timestamp(connector_details["failed_at"])
         current_completed_at = (
-                succeeded_at if succeeded_at > failed_at else failed_at
-            )
-        
+            succeeded_at if succeeded_at > failed_at else failed_at
+        )
+
         # The only way to tell if a sync failed is to check if its latest
         # failed_at value is greater than then last known "sync completed at" value.
         if failed_at > previous_completed_at:
-                raise ValueError(
-                    'Fivetran sync for connector "{}" failed; please see logs at {}'.format(
-                        connector_id, URL_LOGS
-                    )
-                )
+            raise AirflowException(
+                f'Fivetran sync for connector "{connector_id}" failed; '
+                f"please see logs at "
+                f"{self._connector_ui_url_logs(service_name, schema_name)}"
+            )
 
         sync_state = connector_details["status"]["sync_state"]
-        log.info(
-            'Connector "{}" current sync_state = {}'.format(
-                connector_id, sync_state
-            )
-        )
+        self.log.info(f'Connector "{connector_id}": sync_state = {sync_state}')
 
         # Check if sync started by FivetranOperator has finished
         # indicated by new 'succeeded_at' timestamp
         if current_completed_at > previous_completed_at:
-            log.info('succeeded_at: {}'.format(succeeded_at.to_iso8601_string()))
-            log.info('connector_id: {}'.format(connector_id))
+            self.log.info('Connector "{}": succeeded_at: {}'.format(
+                connector_id, succeeded_at.to_iso8601_string())
+            )
             return True
         else:
-            log.info('still syncing "{}"'.format(connector_id))
+            self.log.info('still syncing "{}"'.format(connector_id))
             return False
 
     def _parse_timestamp(self, api_time):
