@@ -31,8 +31,9 @@ class RegistryLink(BaseOperatorLink):
 
     def get_link(self, operator, dttm):
         """Get link to registry page."""
-    
-        return REGISTRY_LINK.format(provider='fivetran', operator='fivetranoperator')
+
+        registry_link = "https://registry.astronomer.io/providers/{provider}/modules/{operator}"
+        return registry_link.format(provider='fivetran', operator='fivetranoperator')
 
 
 class FivetranOperator(BaseOperator):
