@@ -68,7 +68,7 @@ class FivetranHook(BaseHook):
         retry_limit: int = 3,
         retry_delay: float = 1.0,
     ) -> None:
-        super().__init__()
+        super().__init__(None) # Passing None fixes a runtime problem in Airflow 1
         self.fivetran_conn = self.get_connection(fivetran_conn_id)
         self.timeout_seconds = timeout_seconds
         if retry_limit < 1:
@@ -183,7 +183,7 @@ class FivetranHook(BaseHook):
 
         if setup_state != "connected":
             raise AirflowException(
-                f'Fivetran connector "{self.connector_id}" not correctly configured, '
+                f'Fivetran connector "{connector_id}" not correctly configured, '
                 f"status: {setup_state}\nPlease see: "
                 f"{self._connector_ui_url_setup(service_name, schema_name)}"
             )
