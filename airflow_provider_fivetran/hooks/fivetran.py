@@ -1,5 +1,4 @@
 import json
-import logging
 from time import sleep
 
 import requests
@@ -9,13 +8,13 @@ import pendulum
 
 # from airflow import __version__
 from airflow.exceptions import AirflowException
-from airflow.hooks.base import BaseHook
-
-log = logging.getLogger(__name__)
+from airflow.hooks.base_hook import BaseHook
 
 
 class FivetranHook(BaseHook):
     """
+    Fivetran API interaction hook.
+
     :param fivetran_conn_id: Maps to the id of the Connection to be used to
         configure this hook.
     :type fivetran_conn_id: str
@@ -25,8 +24,7 @@ class FivetranHook(BaseHook):
     :param retry_limit: The number of times to retry the connection in case of
         service outages.
     :type retry_limit: int
-    :param retry_delay: The number of seconds to wait between retries (it
-        might be a floating point number).
+    :param retry_delay: The number of seconds to wait between retries.
     :type retry_delay: float
     """
 
@@ -41,7 +39,7 @@ class FivetranHook(BaseHook):
         retry_limit: int = 3,
         retry_delay: float = 1.0,
     ) -> None:
-        # super().__init__()
+        super().__init__()
         self.fivetran_conn = self.get_connection(fivetran_conn_id)
         self.timeout_seconds = timeout_seconds
         if retry_limit < 1:
@@ -52,6 +50,7 @@ class FivetranHook(BaseHook):
     def _do_api_call(self, endpoint_info, json=None, force=""):
         """
         Utility function to perform an API call with retries
+
         :param endpoint_info: Tuple of method and endpoint
         :type endpoint_info: tuple[string, string]
         :param json: Parameters for this API call.
@@ -64,14 +63,12 @@ class FivetranHook(BaseHook):
         method, connector_id = endpoint_info
 
         if "token" in self.fivetran_conn.extra_dejson:
-            self.log.info("Using token auth. ")
             auth = _TokenAuth(self.fivetran_conn.extra_dejson["token"])
             if "host" in self.fivetran_conn.extra_dejson:
                 host = self._parse_host(self.fivetran_conn.extra_dejson["host"])
             else:
                 host = self.fivetran_conn.host
         else:
-            self.log.info("Using basic auth. ")
             auth = (self.fivetran_conn.login, self.fivetran_conn.password)
             host = self.fivetran_conn.host
 
@@ -143,6 +140,7 @@ class FivetranHook(BaseHook):
         """
         Ensures connector configuration has been completed successfully and is in
             a functional state.
+
         :param connector_id: Fivetran connector_id, found in connector settings
             page in the Fivetran user interface.
         :type connector_id: str
@@ -174,6 +172,7 @@ class FivetranHook(BaseHook):
         Set connector to manual sync mode, required to force sync through the API.
             Syncs will no longer be performed automatically and must be started
             via the API.
+
         :param connector_id: Fivetran connector_id, found in connector settings
             page in the Fivetran user interface.
         :type connector_id: str
@@ -195,6 +194,7 @@ class FivetranHook(BaseHook):
         Returns if the connector is not syncing or if the connector is syncing,
             when the connector has completed its sync; in any other case, raises
             an exception
+
         :param connector_id: Fivetran connector_id, found in connector settings
             page in the Fivetran user interface.
         :type connector_id: str
@@ -256,6 +256,7 @@ class FivetranHook(BaseHook):
         """
         Returns either the pendulum-parsed actual timestamp or
             a very out-of-date timestamp if not set
+
         :param api_time: timestamp format as returned by the Fivetran API.
         :type api_time: str
         :rtype: Pendulum.DateTime
