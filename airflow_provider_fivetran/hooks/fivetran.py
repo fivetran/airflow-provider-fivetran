@@ -91,10 +91,11 @@ class FivetranHook(BaseHook):
         """
         method, connector_id = endpoint_info
 
-        if 'token' in self.fivetran_conn.extra_dejson:
-            auth = _TokenAuth(self.fivetran_conn.extra_dejson['extra__fivetran__token'])
-            if 'host' in self.fivetran_conn.extra_dejson:
-                host = self._parse_host(self.fivetran_conn.extra_dejson['host'])
+        if "extra__fivetran__token" in self.fivetran_conn.extra_dejson:
+            self.log.info('Using token auth. ')
+            auth = _TokenAuth(self.fivetran_conn.extra_dejson["extra__fivetran__token"])
+            if "host" in self.fivetran_conn.extra_dejson:
+                host = self._parse_host(self.fivetran_conn.extra_dejson["host"])
             else:
                 host = self.fivetran_conn.host
         else:
