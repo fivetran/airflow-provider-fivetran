@@ -4,17 +4,27 @@ import time
 
 import requests
 
-from airflow.models import BaseOperator
+from airflow.models import BaseOperator, BaseOperatorLink
 from airflow.utils.decorators import apply_defaults
 from typing import Any, Dict, List, Optional, Union
 
 
-from hooks.fivetran import FivetranHook
+from airflow_provider_fivetran.hooks.fivetran import FivetranHook
 
-# from airflow.plugins_manager import AirflowPlugin
+REGISTRY_LINK = "https://registry.astronomer.io/providers/{provider}/modules/{operator}"
 
 
 log = logging.getLogger(__name__)
+
+class RegistryLink(BaseOperatorLink):
+    """Link to Registry"""
+
+    name = 'Astronomer Registry'
+
+    def get_link(self, operator, dttm):
+        """Get link to registry page."""
+    
+        return REGISTRY_LINK.format(provider='fivetran', operator='fivetranoperator')
 
 
 class FivetranOperator(BaseOperator):
@@ -28,6 +38,8 @@ class FivetranOperator(BaseOperator):
     :param int poll_status_every_n_seconds: A lower value means more frequent API polling for sync
                 status; 3 seconds is about the minimum before hitting rate limits.
     """
+
+    operator_extra_links = (RegistryLink(),)
 
     @apply_defaults
     def __init__(
