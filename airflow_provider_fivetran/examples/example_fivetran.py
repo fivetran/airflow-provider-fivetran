@@ -3,7 +3,7 @@ import airflow
 from airflow import DAG
 from airflow.models import Variable
 from operators.fivetran import FivetranOperator
-
+from sensors.fivetran import FivetranSensor
 
 
 default_args = {
@@ -16,10 +16,17 @@ dag = DAG(
     default_args=default_args
 )
 
-fivetran_sync = FivetranOperator(
+start_fivetran_sync = FivetranOperator(
     task_id='fivetran-task',
     connector_id=Variable.get("connector_id"),
     dag=dag
 )
 
-fivetran_sync
+wait_fivetran_sync = FivetranSensor(
+    connector_id=Variable.get("connector_id"),
+    poke_interval=5,
+    task_id='fivetran-sensor',
+    dag=dag
+)
+
+start_fivetran_sync >> wait_fivetran_sync
