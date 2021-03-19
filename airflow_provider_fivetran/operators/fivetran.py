@@ -8,7 +8,6 @@ from airflow.models import BaseOperator, BaseOperatorLink
 from airflow.utils.decorators import apply_defaults
 from typing import Any, Dict, List, Optional, Union
 
-
 from airflow_provider_fivetran.hooks.fivetran import FivetranHook
 
 class RegistryLink(BaseOperatorLink):
