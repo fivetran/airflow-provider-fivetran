@@ -92,7 +92,6 @@ class FivetranHook(BaseHook):
         :rtype: dict
         """
         method, connector_id = endpoint_info
-<<<<<<< HEAD
 
         if "extra__fivetran__token" in self.fivetran_conn.extra_dejson:
             self.log.info("Using token auth. (This is unusual, standard is Basic Auth)")
@@ -105,10 +104,6 @@ class FivetranHook(BaseHook):
             auth = (self.fivetran_conn.login, self.fivetran_conn.password)
             host = self.fivetran_conn.host
 
-=======
-        auth = (self.fivetran_conn.login, self.fivetran_conn.password)
-        host = self.fivetran_conn.host
->>>>>>> main
         url = host + connector_id + force
 
         if method == "GET":
