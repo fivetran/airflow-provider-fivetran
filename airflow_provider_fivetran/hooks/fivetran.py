@@ -32,6 +32,9 @@ class FivetranHook(BaseHook):
     default_conn_name = 'fivetran_default'
     conn_type = 'fivetran'
     hook_name = 'Fivetran'
+    api_protocol = 'https'
+    api_host = 'api.fivetran.com'
+    api_path_connectors = '/v1/connectors/'
 
     @staticmethod
     def get_connection_form_widgets() -> Dict[str, Any]:
@@ -91,7 +94,7 @@ class FivetranHook(BaseHook):
         method, connector_id = endpoint_info
 
         if "extra__fivetran__token" in self.fivetran_conn.extra_dejson:
-            self.log.info('Using token auth. ')
+            self.log.info("Using token auth. (This is unusual, standard is Basic Auth)")
             auth = _TokenAuth(self.fivetran_conn.extra_dejson["extra__fivetran__token"])
             if "host" in self.fivetran_conn.extra_dejson:
                 host = self._parse_host(self.fivetran_conn.extra_dejson["host"])
