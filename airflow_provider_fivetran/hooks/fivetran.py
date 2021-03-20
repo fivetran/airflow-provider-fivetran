@@ -90,18 +90,8 @@ class FivetranHook(BaseHook):
         :rtype: dict
         """
         method, connector_id = endpoint_info
-
-        if "extra__fivetran__token" in self.fivetran_conn.extra_dejson:
-            self.log.info('Using token auth. ')
-            auth = _TokenAuth(self.fivetran_conn.extra_dejson["extra__fivetran__token"])
-            if "host" in self.fivetran_conn.extra_dejson:
-                host = self._parse_host(self.fivetran_conn.extra_dejson["host"])
-            else:
-                host = self.fivetran_conn.host
-        else:
-            auth = (self.fivetran_conn.login, self.fivetran_conn.password)
-            host = self.fivetran_conn.host
-
+        auth = (self.fivetran_conn.login, self.fivetran_conn.password)
+        host = self.fivetran_conn.host
         url = host + connector_id + force
 
         if method == "GET":
@@ -232,8 +222,8 @@ class FivetranHook(BaseHook):
         succeeded_at = self._parse_timestamp(connector_details["succeeded_at"])
         failed_at = self._parse_timestamp(connector_details["failed_at"])
         return succeeded_at if succeeded_at > failed_at else failed_at
-    
-    def get_sync_status(self, connector_id, previous_completed_at):    
+
+    def get_sync_status(self, connector_id, previous_completed_at):
         """
         For sensor, return True if connector's 'succeeded_at' field has updated.
         :param connector_id: Fivetran connector_id, found in connector settings
@@ -251,15 +241,17 @@ class FivetranHook(BaseHook):
         current_completed_at = (
                 succeeded_at if succeeded_at > failed_at else failed_at
             )
-        
+
         # The only way to tell if a sync failed is to check if its latest
         # failed_at value is greater than then last known "sync completed at" value.
         if failed_at > previous_completed_at:
+            service_name = connector_details["service"]
+            schema_name = connector_details["schema"]
             raise AirflowException(
                 f'Fivetran sync for connector "{connector_id}" failed; '
                 f"please see logs at "
                 f"{self._connector_ui_url_logs(service_name, schema_name)}"
-        
+            )
         sync_state = connector_details["status"]["sync_state"]
         self.log.info(
             'Connector "{}" current sync_state = {}'.format(
