@@ -1,13 +1,10 @@
-from typing import Any, Callable, Dict, Optional
-
-import pendulum
-import logging
-import json
+from typing import Any
 
 from airflow.exceptions import AirflowException
-from airflow_provider_fivetran.hooks.fivetran import FivetranHook
 from airflow.sensors.base_sensor_operator import BaseSensorOperator
 from airflow.utils.decorators import apply_defaults
+
+from airflow_provider_fivetran.hooks.fivetran import FivetranHook
 
 
 class FivetranSensor(BaseSensorOperator):
@@ -23,10 +20,6 @@ class FivetranSensor(BaseSensorOperator):
     :param poke_interval: Time in seconds that the job should wait in
         between each tries
     :type poke_interval: int
-    :param hook: FivetranHook that will provide interaction with Fivetran API
-    :type hook: airflow_provider_fivetran.hook.FivetranHook
-    :param previous_completed_at: The number of seconds to wait between retries.
-    :type previous_completed_at: pendulum.datetime.DateTime
     """
     @apply_defaults
     def __init__(
@@ -34,12 +27,8 @@ class FivetranSensor(BaseSensorOperator):
         fivetran_conn_id: str = 'fivetran',
         poke_interval: int = 60,
         connector_id=None,
-        hook=None,
-        previous_completed_at=None,
         **kwargs: Any
     ) -> None:
-        
-
         super().__init__(**kwargs)
         self.fivetran_conn_id = fivetran_conn_id
         self.connector_id = connector_id
@@ -47,9 +36,5 @@ class FivetranSensor(BaseSensorOperator):
         self.hook = FivetranHook(self.fivetran_conn_id)
         self.previous_completed_at = self.hook.get_last_sync(self.connector_id)
 
-
     def poke(self, context):
        return self.hook.get_sync_status(self.connector_id, self.previous_completed_at)
-
-
- 

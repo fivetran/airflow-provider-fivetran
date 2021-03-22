@@ -7,7 +7,6 @@ from requests import PreparedRequest, exceptions as requests_exceptions
 from requests.auth import AuthBase
 import pendulum
 
-# from airflow import __version__
 from airflow.exceptions import AirflowException
 from airflow.hooks.base_hook import BaseHook
 
@@ -33,6 +32,9 @@ class FivetranHook(BaseHook):
     default_conn_name = 'fivetran_default'
     conn_type = 'fivetran'
     hook_name = 'Fivetran'
+    api_protocol = 'https'
+    api_host = 'api.fivetran.com'
+    api_path_connectors = 'v1/connectors/'
 
     @staticmethod
     def get_connection_form_widgets() -> Dict[str, Any]:
@@ -54,10 +56,9 @@ class FivetranHook(BaseHook):
             "hidden_fields": ['schema', 'port', 'extra'],
             "relabeling": {},
             "placeholders": {
-                'host': 'fivetran hostname',
-                'login': 'fivetran username',
-                'password': 'fivetran password',
-                'extra__fivetran__token': 'fivetran auth token (can be used instead of login/password)',
+                'host': 'Fivetran API Hostname',
+                'login': 'Fivetran API Key',
+                'password': 'Fivetran API Secret',
             },
         }
 
@@ -76,7 +77,7 @@ class FivetranHook(BaseHook):
         self.retry_limit = retry_limit
         self.retry_delay = retry_delay
 
-    def _do_api_call(self, endpoint_info, json=None, force=""):
+    def _do_api_call(self, endpoint_info, json=None):
         """
         Utility function to perform an API call with retries
 
@@ -89,10 +90,11 @@ class FivetranHook(BaseHook):
             we throw an AirflowException.
         :rtype: dict
         """
-        method, connector_id = endpoint_info
+        method, endpoint = endpoint_info
         auth = (self.fivetran_conn.login, self.fivetran_conn.password)
         host = self.fivetran_conn.host
-        url = host + connector_id + force
+        host = host if host is not None and host != "" else self.api_host
+        url = f"{self.api_protocol}://{host}/{endpoint}"
 
         if method == "GET":
             request_func = requests.get
@@ -156,6 +158,22 @@ class FivetranHook(BaseHook):
     def _connector_ui_url_setup(self, service_name, schema_name):
         return self._connector_ui_url(service_name, schema_name) + "/setup"
 
+    def get_connector(self, connector_id):
+        """
+        Fetches the detail of a connector.
+
+        :param connector_id: Fivetran connector_id, found in connector settings
+            page in the Fivetran user interface.
+        :type connector_id: str
+        :rtype: Dict
+        """
+        if connector_id == "":
+            raise ValueError("No value specified for connector_id")
+        endpoint = self.api_path_connectors + connector_id
+        resp = self._do_api_call(("GET", endpoint))
+        return resp["data"]
+
+
     def check_connector(self, connector_id):
         """
         Ensures connector configuration has been completed successfully and is in
@@ -165,19 +183,16 @@ class FivetranHook(BaseHook):
             page in the Fivetran user interface.
         :type connector_id: str
         """
-        resp = self._do_api_call(("GET", connector_id))
-        connector_details = resp["data"]
+        connector_details = self.get_connector(connector_id)
         service_name = connector_details["service"]
         schema_name = connector_details["schema"]
         setup_state = connector_details["status"]["setup_state"]
-
         if setup_state != "connected":
             raise AirflowException(
                 f'Fivetran connector "{connector_id}" not correctly configured, '
                 f"status: {setup_state}\nPlease see: "
                 f"{self._connector_ui_url_setup(service_name, schema_name)}"
             )
-        # URL for connector logs within the UI
         self.log.info(
             f"Connector type: {service_name}, connector schema: {schema_name}"
         )
@@ -185,7 +200,7 @@ class FivetranHook(BaseHook):
             f"Connectors logs at "
             f"{self._connector_ui_url_logs(service_name, schema_name)}"
         )
-        return resp
+        return True
 
     def set_manual_schedule(self, connector_id):
         """
@@ -197,8 +212,10 @@ class FivetranHook(BaseHook):
             page in the Fivetran user interface.
         :type connector_id: str
         """
+        endpoint = self.api_path_connectors + connector_id
         return self._do_api_call(
-            ("PATCH", connector_id), json.dumps({"schedule_type": "manual"})
+            ("PATCH", endpoint),
+            json.dumps({"schedule_type": "manual"})
         )
 
     def start_fivetran_sync(self, connector_id):
@@ -207,18 +224,19 @@ class FivetranHook(BaseHook):
             page in the Fivetran user interface.
         :type connector_id: str
         """
-        return self._do_api_call(("POST", connector_id), json=None, force="/force")
+        endpoint = self.api_path_connectors + connector_id + "/force"
+        return self._do_api_call(("POST", endpoint))
 
     def get_last_sync(self, connector_id):
         """
-        Get the last time Fivetran connector completed a sync. Sensor will monitor until this field updates.
+        Get the last time Fivetran connector completed a sync.
+            Used with FivetranSensor to monitor sync completion status.
+
         :param connector_id: Fivetran connector_id, found in connector settings
             page in the Fivetran user interface.
         :type connector_id: str
         """
-
-        resp = self._do_api_call(('GET',connector_id))
-        connector_details = resp["data"]
+        connector_details = self.get_connector(connector_id)
         succeeded_at = self._parse_timestamp(connector_details["succeeded_at"])
         failed_at = self._parse_timestamp(connector_details["failed_at"])
         return succeeded_at if succeeded_at > failed_at else failed_at
@@ -229,18 +247,18 @@ class FivetranHook(BaseHook):
         :param connector_id: Fivetran connector_id, found in connector settings
             page in the Fivetran user interface.
         :type connector_id: str
-        :param previous_completed_at: The last time the connector ran, collected on Sensor initialization.
+        :param previous_completed_at: The last time the connector ran, collected on Sensor
+            initialization.
         :type previous_completed_at: pendulum.datetime.DateTime
         """
         # @todo Need logic here to tell if the sync is not running at all and not
         # likely to run in the near future.
-        resp = self._do_api_call(('GET',connector_id))
-        connector_details = resp["data"]
+        connector_details = self.get_connector(connector_id)
         succeeded_at = self._parse_timestamp(connector_details["succeeded_at"])
         failed_at = self._parse_timestamp(connector_details["failed_at"])
         current_completed_at = (
-                succeeded_at if succeeded_at > failed_at else failed_at
-            )
+            succeeded_at if succeeded_at > failed_at else failed_at
+        )
 
         # The only way to tell if a sync failed is to check if its latest
         # failed_at value is greater than then last known "sync completed at" value.
@@ -252,18 +270,16 @@ class FivetranHook(BaseHook):
                 f"please see logs at "
                 f"{self._connector_ui_url_logs(service_name, schema_name)}"
             )
+
         sync_state = connector_details["status"]["sync_state"]
-        self.log.info(
-            'Connector "{}" current sync_state = {}'.format(
-                connector_id, sync_state
-            )
-        )
+        self.log.info(f'Connector "{connector_id}": sync_state = {sync_state}')
 
         # Check if sync started by FivetranOperator has finished
         # indicated by new 'succeeded_at' timestamp
         if current_completed_at > previous_completed_at:
-            self.log.info('succeeded_at: {}'.format(succeeded_at.to_iso8601_string()))
-            self.log.info('connector_id: {}'.format(connector_id))
+            self.log.info('Connector "{}": succeeded_at: {}'.format(
+                connector_id, succeeded_at.to_iso8601_string())
+            )
             return True
         else:
             return False
