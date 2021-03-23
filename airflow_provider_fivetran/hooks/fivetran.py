@@ -122,9 +122,6 @@ class FivetranHook(BaseHook):
                     auth=auth,
                     headers=headers
                 )
-                self.log.debug("requests url: " + str(response.request.url))
-                self.log.debug("requests body: " + str(response.request.body))
-                self.log.debug("requests headers: " + str(response.request.headers))
                 response.raise_for_status()
                 return response.json()
             except requests_exceptions.RequestException as e:
