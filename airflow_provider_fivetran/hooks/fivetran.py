@@ -32,9 +32,11 @@ class FivetranHook(BaseHook):
     default_conn_name = 'fivetran_default'
     conn_type = 'fivetran'
     hook_name = 'Fivetran'
+    api_user_agent = 'airflow_provider_fivetran/0.1'
     api_protocol = 'https'
     api_host = 'api.fivetran.com'
     api_path_connectors = 'v1/connectors/'
+
 
     @staticmethod
     def get_connection_form_widgets() -> Dict[str, Any]:
@@ -96,12 +98,17 @@ class FivetranHook(BaseHook):
         host = host if host is not None and host != "" else self.api_host
         url = f"{self.api_protocol}://{host}/{endpoint}"
 
+        headers = {
+            "User-Agent": self.api_user_agent
+        }
+
         if method == "GET":
             request_func = requests.get
         elif method == "POST":
             request_func = requests.post
         elif method == "PATCH":
             request_func = requests.patch
+            headers.update({"Content-Type": "application/json;version=2"})
         else:
             raise AirflowException("Unexpected HTTP Method: " + method)
 
@@ -113,9 +120,7 @@ class FivetranHook(BaseHook):
                     data=json if method in ("POST", "PATCH") else None,
                     params=json if method in ("GET") else None,
                     auth=auth,
-                    headers={"Content-Type": "application/json;version=2"}
-                    if method == "PATCH"
-                    else None,
+                    headers=headers
                 )
                 response.raise_for_status()
                 return response.json()
