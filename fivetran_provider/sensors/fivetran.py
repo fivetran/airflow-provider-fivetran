@@ -4,7 +4,7 @@ from airflow.exceptions import AirflowException
 from airflow.sensors.base_sensor_operator import BaseSensorOperator
 from airflow.utils.decorators import apply_defaults
 
-from airflow_provider_fivetran.hooks.fivetran import FivetranHook
+from fivetran_provider.hooks.fivetran import FivetranHook
 
 
 class FivetranSensor(BaseSensorOperator):

@@ -14,14 +14,14 @@ pip install airflow-provider-fivetran
 
 ## Modules
 
-[Fivetran Operator](./airflow_provider_fivetran/operators/fivetran.py): A base operator for Fivetran. Import into your DAG via:
+[Fivetran Operator](./fivetran_provider/operators/fivetran.py): A base operator for Fivetran. Import into your DAG via:
 
 ```
-from airflow_provider_fivetran.operators.fivetran import FivetranOperator
+from fivetran_provider.operators.fivetran import FivetranOperator
 ```
 
 ## Examples
 
-See the [**examples**](./airflow_provider_fivetran/examples) directory for an example DAG.
+See the [**examples**](./fivetran_provider/examples) directory for an example DAG.
 
 **This operator is in very early stages of development! Feel free to submit issues, PRs, or email the current authors at [devrel@fivetran.com](mailto:devrel@fivetran.com) for feedback.
