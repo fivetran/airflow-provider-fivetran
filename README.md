@@ -53,7 +53,7 @@ from fivetran_provider.sensors.fivetran import FivetranSensor
 
 ## Examples
 
-See the [**examples**](./fivetran_provider/examples) directory for an example DAG.
+See the [**examples**](./fivetran_provider/example_dags) directory for an example DAG.
 
 ## Issues
 
