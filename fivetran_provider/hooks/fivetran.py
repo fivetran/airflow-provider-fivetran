@@ -223,6 +223,12 @@ class FivetranHook(BaseHook):
             json.dumps({"schedule_type": "manual"})
         )
 
+    def prep_connector(self, connector_id):
+        self.check_connector(connector_id)
+        if self.get_connector(connector_id)['schedule_type'] != 'manual':
+            return self.set_manual_schedule(connector_id)
+        return True
+
     def start_fivetran_sync(self, connector_id):
         """
         :param connector_id: Fivetran connector_id, found in connector settings
