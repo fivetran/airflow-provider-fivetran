@@ -5,7 +5,7 @@ Requires the unittest, pytest, and requests-mock Python libraries.
 
 Run test:
 
-    python3 -m unittest test.operators.test_operators.TestFivetranOperator
+    python3 -m unittest tests.operators.test_operators.TestFivetranOperator
 
 """
 
