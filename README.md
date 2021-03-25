@@ -61,7 +61,7 @@ from fivetran_provider.sensors.fivetran import FivetranSensor
 
 ## Examples
 
-See the [**examples**](./fivetran_provider/example_dags) directory for an example DAG.
+See the [**examples**](https://github.com/fivetran/airflow-provider-fivetran/tree/main/fivetran_provider/example_dags) directory for an example DAG.
 
 ## Issues
 
