@@ -1,22 +1,25 @@
 """
-Unittest module to test Fivetran Operators.
+Unittest module to test Fivetran Sensors.
 
 Requires the unittest, pytest, and requests-mock Python libraries.
 
 Run test:
 
-    python3 -m unittest test.hooks.test_hooks.TestFivetranHook
+    python3 -m unittest tests.sensors.test_sensors.TestFivetranSensor
 
 """
 
 import logging
 import os
+import pendulum
 import pytest
 import requests_mock
 import unittest
 from unittest import mock
 
-# Import Hook
+
+# Import Operator as module
+from fivetran_provider.sensors.fivetran import FivetranSensor
 from fivetran_provider.hooks.fivetran import FivetranHook
 
 
@@ -58,40 +61,25 @@ MOCK_FIVETRAN_RESPONSE_PAYLOAD = {
 
 # Mock the `conn_fivetran` Airflow connection (note the `@` after `API_SECRET`)
 @mock.patch.dict('os.environ', AIRFLOW_CONN_CONN_FIVETRAN='http://API_KEY:API_SECRET@')
-class TestFivetranHook(unittest.TestCase):
+class TestFivetranSensor(unittest.TestCase):
     """ 
-    Test functions for Fivetran Hook. 
+    Test functions for Fivetran Operator. 
 
     Mocks responses from Fivetran API.
     """
 
+    @mock.patch.object(FivetranSensor, 'poke', 'returned_sync_status')
     @requests_mock.mock()
-    def test_get_connector(self, m):
+    def test_del(self, m):
 
-        m.get('https://api.fivetran.com/v1/connectors/interchangeable_revenge',
-              json=MOCK_FIVETRAN_RESPONSE_PAYLOAD)
-
-        hook = FivetranHook(
+        sensor = FivetranSensor(
+            task_id='my_fivetran_sensor',
             fivetran_conn_id='conn_fivetran',
+            connector_id='interchangeable_revenge'
         )
 
-        result = hook.get_connector(connector_id='interchangeable_revenge')
-
-        assert result['status']['setup_state'] == 'connected'
-
-    @requests_mock.mock()
-    def test_start_fivetran_sync(self, m):
-
-        m.post('https://api.fivetran.com/v1/connectors/interchangeable_revenge/force',
-               json=MOCK_FIVETRAN_RESPONSE_PAYLOAD)
-
-        hook = FivetranHook(
-            fivetran_conn_id='conn_fivetran',
-        )
-
-        result = hook.start_fivetran_sync(connector_id='interchangeable_revenge')
-
-        assert result['code'] == 'Success'
+        log.info(sensor.poke)
+        assert sensor.poke == 'returned_sync_status'
 
 
 if __name__ == '__main__':
