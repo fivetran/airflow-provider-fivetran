@@ -17,14 +17,22 @@ dag = DAG(
 
 fivetran_sync_start = FivetranOperator(
     task_id='fivetran-task',
+<<<<<<< HEAD
     fivetran_conn_id='fivetran_default',
+=======
+    fivetran_conn_id='fivetran',
+>>>>>>> 5874b1f... - Create tests/ module
     connector_id="{{ var.value.get('connector_id', 'fallback_connector_id') }}",
     dag=dag
 )
 
 fivetran_sync_wait = FivetranSensor(
     task_id='fivetran-sensor',
+<<<<<<< HEAD
     fivetran_conn_id='fivetran_default',
+=======
+    fivetran_conn_id='fivetran',
+>>>>>>> 5874b1f... - Create tests/ module
     connector_id="{{ var.value.get('connector_id', 'fallback_connector_id') }}",
     poke_interval=5,
     dag=dag
