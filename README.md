@@ -27,7 +27,7 @@ The sensor and operator assume the `Conn Id` is set to `fivetran`, however if yo
 
 ## Modules
 
-### [Fivetran Operator](./fivetran_provider/operators/fivetran.py)
+### [Fivetran Operator](https://github.com/fivetran/airflow-provider-fivetran/blob/main/fivetran_provider/operators/fivetran.py)
 
 Starts a Fivetran sync job. Note that when a Fivetran sync job is controlled via an Operator, it is no longer run on the schedule as managed by Fivetran. In other words, it is now scheduled only from Airflow.
 
@@ -38,7 +38,7 @@ Import into your DAG via:
 from fivetran_provider.operators.fivetran import FivetranOperator
 ```
 
-### [Fivetran Sensor](./fivetran_provider/sensors/fivetran.py)
+### [Fivetran Sensor](https://github.com/fivetran/airflow-provider-fivetran/blob/main/fivetran_provider/sensors/fivetran.py)
 
 Monitors a Fivetran sync job for completion. This allows you to trigger downstream processes only when one or more Fivetran sync jobs have completed, ensuring data consistency.
 
