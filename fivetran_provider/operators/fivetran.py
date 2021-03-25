@@ -70,7 +70,6 @@ class FivetranOperator(BaseOperator):
 
     def execute(self, context):
         hook = self._get_hook()
-        hook.check_connector(self.connector_id)
-        hook.set_manual_schedule(self.connector_id)
+        hook.prep_connector(self.connector_id)
         response = hook.start_fivetran_sync(self.connector_id)
         return response
