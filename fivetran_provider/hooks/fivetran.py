@@ -82,9 +82,7 @@ class FivetranHook(BaseHook):
         """
         method, endpoint = endpoint_info
         auth = (self.fivetran_conn.login, self.fivetran_conn.password)
-        host = self.fivetran_conn.host
-        host = host if host is not None and host != "" else self.api_host
-        url = f"{self.api_protocol}://{host}/{endpoint}"
+        url = f"{self.api_protocol}://{self.api_host}/{endpoint}"
 
         headers = {
             "User-Agent": self.api_user_agent
@@ -314,17 +312,3 @@ def _retryable_error(exception) -> bool:
         or exception.response is not None
         and exception.response.status_code >= 500
     )
-
-
-class _TokenAuth(AuthBase):
-    """
-    Helper class for requests Auth field. AuthBase requires you to implement the
-        __call__ magic function.
-    """
-
-    def __init__(self, token: str) -> None:
-        self.token = token
-
-    def __call__(self, r: PreparedRequest) -> PreparedRequest:
-        r.headers["Authorization"] = "Bearer " + self.token
-        return r
