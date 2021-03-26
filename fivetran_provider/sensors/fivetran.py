@@ -9,13 +9,25 @@ from fivetran_provider.hooks.fivetran import FivetranHook
 
 class FivetranSensor(BaseSensorOperator):
     """
-    Sensor waits for Fivetran syncs to finish.
+    `FivetranSensor` monitors a Fivetran sync job for completion.
 
-    :param fivetran_conn_id: Maps to the id of the Connection to be used to
-        configure this hook.
+    Monitoring with `FivetranSensor` allows you to trigger downstream processes only
+        when the Fivetran sync jobs have completed, ensuring data consistency. You can
+        use multiple instances of `FivetranSensor` to monitor multiple Fivetran
+        connectors. Note, it is possible to monitor a sync that is scheduled and managed
+        from Fivetran; in other words, you can use `FivetranSensor` without using
+        `FivetranOperator`. If used in this way, your DAG will wait until the sync job
+        starts on its Fivetran-controlled schedule and then completes. `FivetranSensor`
+        requires that you specify the `connector_id` of the sync job to start. You can
+        find `connector_id` in the Settings page of the connector you configured in the
+        [Fivetran dashboard](https://fivetran.com/dashboard/connectors).
+
+
+    :param fivetran_conn_id: `Conn ID` of the Connection to be used to configure
+        the hook.
     :type fivetran_conn_id: str
     :param connector_id: ID of the Fivetran connector to sync, found on the
-        Connector settings page.
+        Connector settings page in the Fivetran Dashboard.
     :type connector_id: str
     :param poke_interval: Time in seconds that the job should wait in
         between each tries
