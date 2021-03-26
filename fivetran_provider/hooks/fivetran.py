@@ -15,11 +15,11 @@ class FivetranHook(BaseHook):
     """
     Fivetran API interaction hook.
 
-    :param fivetran_conn_id: Maps to the id of the Connection to be used to
+    :param fivetran_conn_id: `Conn ID` of the Connection to be used to
         configure this hook.
     :type fivetran_conn_id: str
     :param timeout_seconds: The amount of time in seconds the requests library
-        will wait before timing-out.
+        will wait before timing out.
     :type timeout_seconds: int
     :param retry_limit: The number of times to retry the connection in case of
         service outages.
