@@ -60,7 +60,8 @@ class FivetranHook(BaseHook):
         retry_delay: float = 1.0,
     ) -> None:
         super().__init__(None) # Passing None fixes a runtime problem in Airflow 1
-        self.fivetran_conn = self.get_connection(fivetran_conn_id)
+        self.conn_id = fivetran_conn_id
+        self.fivetran_conn = None
         self.timeout_seconds = timeout_seconds
         if retry_limit < 1:
             raise ValueError("Retry limit must be greater than equal to 1")
@@ -81,6 +82,8 @@ class FivetranHook(BaseHook):
         :rtype: dict
         """
         method, endpoint = endpoint_info
+        if self.fivetran_conn is None:
+            self.fivetran_conn = self.get_connection(self.conn_id)
         auth = (self.fivetran_conn.login, self.fivetran_conn.password)
         url = f"{self.api_protocol}://{self.api_host}/{endpoint}"
 
