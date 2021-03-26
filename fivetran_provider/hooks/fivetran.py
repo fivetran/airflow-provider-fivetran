@@ -37,30 +37,18 @@ class FivetranHook(BaseHook):
     api_host = 'api.fivetran.com'
     api_path_connectors = 'v1/connectors/'
 
-
-    @staticmethod
-    def get_connection_form_widgets() -> Dict[str, Any]:
-        """Returns connection widgets to add to connection form"""
-        from flask_appbuilder.fieldwidgets import BS3PasswordFieldWidget
-        from flask_babel import lazy_gettext
-        from wtforms import PasswordField
-
-        return {
-            "extra__fivetran__token": PasswordField(
-                lazy_gettext('Token'), widget=BS3PasswordFieldWidget()
-            ),
-        }
-
     @staticmethod
     def get_ui_field_behaviour() -> Dict:
         """Returns custom field behaviour"""
         return {
-            "hidden_fields": ['schema', 'port', 'extra'],
-            "relabeling": {},
-            "placeholders": {
-                'host': 'Fivetran API Hostname',
+            "hidden_fields": ['schema', 'port', 'extra', 'host'],
+            "relabeling": {
                 'login': 'Fivetran API Key',
                 'password': 'Fivetran API Secret',
+            },
+            "placeholders": {
+                'login': 'api key',
+                'password': 'api secret',
             },
         }
 
