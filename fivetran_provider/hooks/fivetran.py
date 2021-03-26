@@ -37,16 +37,18 @@ class FivetranHook(BaseHook):
     api_host = 'api.fivetran.com'
     api_path_connectors = 'v1/connectors/'
 
-
     @staticmethod
     def get_ui_field_behaviour() -> Dict:
         """Returns custom field behaviour"""
         return {
-            "hidden_fields": ['host', 'schema', 'port', 'extra'],
-            "relabeling": {},
-            "placeholders": {
+            "hidden_fields": ['schema', 'port', 'extra', 'host'],
+            "relabeling": {
                 'login': 'Fivetran API Key',
                 'password': 'Fivetran API Secret',
+            },
+            "placeholders": {
+                'login': 'api key',
+                'password': 'api secret',
             },
         }
 
