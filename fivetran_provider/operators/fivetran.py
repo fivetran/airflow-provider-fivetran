@@ -10,6 +10,7 @@ from typing import Any, Dict, List, Optional, Union
 
 from fivetran_provider.hooks.fivetran import FivetranHook
 
+
 class RegistryLink(BaseOperatorLink):
     """Link to Registry"""
 
@@ -20,6 +21,7 @@ class RegistryLink(BaseOperatorLink):
 
         registry_link = "https://registry.astronomer.io/providers/{provider}/modules/{operator}"
         return registry_link.format(provider='fivetran', operator='fivetranoperator')
+
 
 class FivetranOperator(BaseOperator):
     """
@@ -48,6 +50,9 @@ class FivetranOperator(BaseOperator):
     """
 
     operator_extra_links = (RegistryLink(),)
+
+    # Define which fields get jinjaified
+    template_fields = ["connector_id"]
 
     @apply_defaults
     def __init__(
