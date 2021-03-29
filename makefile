@@ -1,5 +1,8 @@
-.PHONY: build dist-test dist
+.PHONY: clean build dist-test dist
 SHELL := /bin/bash
+
+clean:
+	rm -rf dist
 
 build:
 	python3 -m pip install --upgrade build
