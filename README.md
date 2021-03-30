@@ -1,6 +1,6 @@
-# Apache Airflow Provider for Fivetran
+# Fivetran Provider for Apache Airflow
 
-This package provides an Airflow operator, sensor, and hook for [Fivetran](https://fivetran.com). `FivetranOperator` allows you to start Fivetran jobs from Airflow and `FivetranSensor` allows you to monitor a Fivetran sync job for completion before running downstream processes.
+This package provides an operator, sensor, and hook that integrates [Fivetran](https://fivetran.com) into Apache Airflow. `FivetranOperator` allows you to start Fivetran jobs from Airflow and `FivetranSensor` allows you to monitor a Fivetran sync job for completion before running downstream processes.
 
 Fivetran automates your data pipeline, and Airflow automates your data processing.
 
