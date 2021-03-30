@@ -28,11 +28,11 @@ class FivetranOperator(BaseOperator):
     `FivetranOperator` starts a Fivetran sync job.
 
     `FivetranOperator` requires that you specify the `connector_id` of the sync job to
-        start. You can find `connector_id` in the Settings page of the connector you
-        configured in the [Fivetran dashboard](https://fivetran.com/dashboard/connectors).
-        Note that when a Fivetran sync job is controlled via an Operator, it is no longer
-        run on the schedule as managed by Fivetran. In other words, it is now scheduled only
-        from Airflow.
+    start. You can find `connector_id` in the Settings page of the connector you
+    configured in the `Fivetran dashboard <https://fivetran.com/dashboard/connectors>`_.
+    Note that when a Fivetran sync job is controlled via an Operator, it is no longer
+    run on the schedule as managed by Fivetran. In other words, it is now scheduled only
+    from Airflow.
 
     :param fivetran_conn_id: `Conn ID` of the Connection to be used to configure
         the hook.
