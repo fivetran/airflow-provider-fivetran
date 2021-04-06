@@ -32,6 +32,10 @@ class FivetranSensor(BaseSensorOperator):
     :param poke_interval: Time in seconds that the job should wait in
         between each tries
     :type poke_interval: int
+    :param fivetran_retry_limit: # of retries when encountering API errors
+    :type fivetran_retry_limit: Optional[int]
+    :param fivetran_retry_delay: Time to wait before retrying API request
+    :type fivetran_retry_delay: int
     """
 
     # Define which fields get jinjaified
@@ -42,6 +46,8 @@ class FivetranSensor(BaseSensorOperator):
         self,
         fivetran_conn_id: str = 'fivetran',
         poke_interval: int = 60,
+        fivetran_retry_limit: int = 3,
+        fivetran_retry_delay: int = 1,
         connector_id=None,
         **kwargs: Any
     ) -> None:
@@ -49,12 +55,18 @@ class FivetranSensor(BaseSensorOperator):
         self.fivetran_conn_id = fivetran_conn_id
         self.connector_id = connector_id
         self.poke_interval = poke_interval
-        self.hook = None
         self.previous_completed_at = None
+        self.fivetran_retry_limit = fivetran_retry_limit
+        self.fivetran_retry_delay = fivetran_retry_delay
+
+    def _get_hook(self) -> FivetranHook:
+        return FivetranHook(
+            self.fivetran_conn_id,
+            retry_limit=self.fivetran_retry_limit,
+            retry_delay=self.fivetran_retry_delay,
+        )
 
     def poke(self, context):
-        if self.hook is None:
-            self.hook = FivetranHook(self.fivetran_conn_id)
-        if self.previous_completed_at is None:
-            self.previous_completed_at = self.hook.get_last_sync(self.connector_id)
+        hook = self._get_hook()    
+        self.previous_completed_at = self.hook.get_last_sync(self.connector_id)
         return self.hook.get_sync_status(self.connector_id, self.previous_completed_at)

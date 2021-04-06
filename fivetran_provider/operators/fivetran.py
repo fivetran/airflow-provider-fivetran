@@ -44,9 +44,6 @@ class FivetranOperator(BaseOperator):
     :param connector_id: ID of the Fivetran connector to sync, found on the
         Connector settings page.
     :type connector_id: str
-    :param poll_frequency: In seconds. A lower value means more frequent API polling
-        for sync status; 3 seconds is about the minimum before hitting rate limits.
-    :type poll_frequency: Optional[int]
     """
 
     operator_extra_links = (RegistryLink(),)
@@ -83,5 +80,4 @@ class FivetranOperator(BaseOperator):
     def execute(self, context):
         hook = self._get_hook()
         hook.prep_connector(self.connector_id)
-        response = hook.start_fivetran_sync(self.connector_id)
-        return response
+        return hook.start_fivetran_sync(self.connector_id)
