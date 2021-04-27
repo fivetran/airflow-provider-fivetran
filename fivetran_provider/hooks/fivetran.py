@@ -55,13 +55,14 @@ class FivetranHook(BaseHook):
     def __init__(
         self,
         fivetran_conn_id: str = "fivetran",
+        fivetran_conn = None,
         timeout_seconds: int = 180,
         retry_limit: int = 3,
         retry_delay: float = 1.0,
     ) -> None:
         super().__init__(None) # Passing None fixes a runtime problem in Airflow 1
         self.conn_id = fivetran_conn_id
-        self.fivetran_conn = None
+        self.fivetran_conn = fivetran_conn
         self.timeout_seconds = timeout_seconds
         if retry_limit < 1:
             raise ValueError("Retry limit must be greater than equal to 1")
