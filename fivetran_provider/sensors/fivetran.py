@@ -67,6 +67,7 @@ class FivetranSensor(BaseSensorOperator):
         )
 
     def poke(self, context):
-        hook = self._get_hook()    
-        self.previous_completed_at = hook.get_last_sync(self.connector_id)
+        hook = self._get_hook()
+        if self.previous_completed_at is None:
+            self.previous_completed_at = hook.get_last_sync(self.connector_id)
         return hook.get_sync_status(self.connector_id, self.previous_completed_at)
