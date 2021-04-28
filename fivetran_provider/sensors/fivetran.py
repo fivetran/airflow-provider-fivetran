@@ -58,13 +58,16 @@ class FivetranSensor(BaseSensorOperator):
         self.previous_completed_at = None
         self.fivetran_retry_limit = fivetran_retry_limit
         self.fivetran_retry_delay = fivetran_retry_delay
+        self.hook = None
 
     def _get_hook(self) -> FivetranHook:
-        return FivetranHook(
-            self.fivetran_conn_id,
-            retry_limit=self.fivetran_retry_limit,
-            retry_delay=self.fivetran_retry_delay,
-        )
+        if self.hook is None:
+            self.hook = FivetranHook(
+                self.fivetran_conn_id,
+                retry_limit=self.fivetran_retry_limit,
+                retry_delay=self.fivetran_retry_delay,
+            )
+        return self.hook
 
     def poke(self, context):
         hook = self._get_hook()
