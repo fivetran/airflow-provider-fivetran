@@ -5,5 +5,5 @@ def get_provider_info():
       "description": "A Fivetran provider for Apache Airflow.",
       "hook-class-names": ["fivetran_provider.hooks.fivetran.FivetranHook"],
       "extra-links":["fivetran_provider.operators.fivetran.RegistryLink"],
-      "versions": ["1.0.0"]
+      "versions": ["1.0.1"]
   }
