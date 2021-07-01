@@ -5,7 +5,6 @@ import time
 import requests
 
 from airflow.models import BaseOperator, BaseOperatorLink
-from airflow.utils.decorators import apply_defaults
 from typing import Any, Dict, List, Optional, Union
 
 from fivetran_provider.hooks.fivetran import FivetranHook
