@@ -41,7 +41,6 @@ class FivetranSensor(BaseSensorOperator):
     # Define which fields get jinjaified
     template_fields = ["connector_id"]
 
-    @apply_defaults
     def __init__(
         self,
         fivetran_conn_id: str = 'fivetran',

@@ -51,7 +51,6 @@ class FivetranOperator(BaseOperator):
     # Define which fields get jinjaified
     template_fields = ["connector_id"]
 
-    @apply_defaults
     def __init__(
         self,
         run_name: Optional[str] = None,
