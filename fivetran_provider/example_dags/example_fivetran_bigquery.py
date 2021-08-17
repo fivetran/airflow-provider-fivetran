@@ -1,5 +1,4 @@
 from airflow import DAG, AirflowException
-from airflow.models import Variable
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.providers.google.cloud.sensors.bigquery import BigQueryTableExistenceSensor
 from airflow.providers.google.cloud.operators.bigquery import BigQueryValueCheckOperator
