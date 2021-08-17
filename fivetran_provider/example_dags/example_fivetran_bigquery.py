@@ -47,13 +47,13 @@ with DAG('example_fivetran_bigquery',
     fivetran_sync_start = FivetranOperator(
         task_id='fivetran-task',
         fivetran_conn_id='fivetran_default',
-        connector_id='{{ var.value.get("connector_id") }}'
+        connector_id='{{ var.value.connector_id }}'
     )
 
     fivetran_sync_wait = FivetranSensor(
         task_id='fivetran-sensor',
         fivetran_conn_id='fivetran_default',
-        connector_id='{{ var.value.get("connector_id") }}',
+        connector_id='{{ var.value.connector_id }}',
         poke_interval=5
     )
 
@@ -64,7 +64,7 @@ with DAG('example_fivetran_bigquery',
     """
     validate_bigquery = BigQueryTableExistenceSensor(
         task_id='validate_bigquery',
-        project_id=Variable.get('gcp_project_id'),
+        project_id='{{ var.value.gcp_project_id }}',
         dataset_id=DATASET,
         table_id='forestfires',
     )
