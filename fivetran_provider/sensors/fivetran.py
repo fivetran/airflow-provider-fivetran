@@ -1,10 +1,8 @@
-from typing import Any
-
-from airflow.exceptions import AirflowException
 from airflow.sensors.base_sensor_operator import BaseSensorOperator
 from airflow.utils.decorators import apply_defaults
 
 from fivetran_provider.hooks.fivetran import FivetranHook
+from typing import Any
 
 
 class FivetranSensor(BaseSensorOperator):
@@ -44,11 +42,11 @@ class FivetranSensor(BaseSensorOperator):
     @apply_defaults
     def __init__(
         self,
-        fivetran_conn_id: str = 'fivetran',
+        connector_id: str,
+        fivetran_conn_id: str = "fivetran",
         poke_interval: int = 60,
         fivetran_retry_limit: int = 3,
         fivetran_retry_delay: int = 1,
-        connector_id=None,
         **kwargs: Any
     ) -> None:
         super().__init__(**kwargs)
