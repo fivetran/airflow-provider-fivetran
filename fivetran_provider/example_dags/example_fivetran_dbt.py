@@ -12,14 +12,13 @@ default_args = {
     "start_date": datetime(2021, 4, 6),
 }
 
-dag = DAG(
+with DAG(
     dag_id="ad_reporting_dag",
     default_args=default_args,
     schedule_interval=timedelta(days=1),
-    catchup=False,
-)
+    catchup=False
+    ) as dag:
 
-with dag:
     linkedin_sync = FivetranOperator(
         task_id="linkedin-ads-sync",
         connector_id="{{ var.value.linkedin_connector_id }}",
