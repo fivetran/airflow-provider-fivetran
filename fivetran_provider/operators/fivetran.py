@@ -44,7 +44,7 @@ class FivetranOperator(BaseOperator):
     :param connector_id: ID of the Fivetran connector to sync, found on the
         Connector settings page.
     :type connector_id: str
-    :param manual: manual schedule flag, disable to keep connector on Fivetran schedule
+    :param manual: manual schedule flag, Default is true, to take connector off Fivetran schedule. Set to false to disable and keep connector on Fivetran schedule
     :type manual: bool
     """
 
@@ -63,7 +63,7 @@ class FivetranOperator(BaseOperator):
         fivetran_retry_delay: int = 1,
         connector_id: str = None,
         poll_frequency: int = 15,
-        manual=True,
+        manual: bool = True,
         **kwargs
     ):
         super().__init__(**kwargs)
