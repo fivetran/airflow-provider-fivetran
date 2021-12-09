@@ -1,26 +1,22 @@
-import logging
-import json
-import time
-
-import requests
-
 from airflow.models import BaseOperator, BaseOperatorLink
 from airflow.utils.decorators import apply_defaults
-from typing import Any, Dict, List, Optional, Union
 
 from fivetran_provider.hooks.fivetran import FivetranHook
+from typing import Optional
 
 
 class RegistryLink(BaseOperatorLink):
     """Link to Registry"""
 
-    name = 'Astronomer Registry'
+    name = "Astronomer Registry"
 
     def get_link(self, operator, dttm):
         """Get link to registry page."""
 
-        registry_link = "https://registry.astronomer.io/providers/{provider}/modules/{operator}"
-        return registry_link.format(provider='fivetran', operator='fivetranoperator')
+        registry_link = (
+            "https://registry.astronomer.io/providers/{provider}/modules/{operator}"
+        )
+        return registry_link.format(provider="fivetran", operator="fivetranoperator")
 
 
 class FivetranOperator(BaseOperator):
@@ -56,12 +52,12 @@ class FivetranOperator(BaseOperator):
     @apply_defaults
     def __init__(
         self,
+        connector_id: str,
         run_name: Optional[str] = None,
         timeout_seconds: Optional[int] = None,
-        fivetran_conn_id: str = 'fivetran',
+        fivetran_conn_id: str = "fivetran",
         fivetran_retry_limit: int = 3,
         fivetran_retry_delay: int = 1,
-        connector_id: str = None,
         poll_frequency: int = 15,
         manual: bool = True,
         **kwargs
