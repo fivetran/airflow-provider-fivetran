@@ -40,6 +40,8 @@ class FivetranOperator(BaseOperator):
     :param connector_id: ID of the Fivetran connector to sync, found on the
         Connector settings page.
     :type connector_id: str
+    :param manual: manual schedule flag, Default is true, to take connector off Fivetran schedule. Set to false to disable and keep connector on Fivetran schedule
+    :type manual: bool
     """
 
     operator_extra_links = (RegistryLink(),)
@@ -57,6 +59,7 @@ class FivetranOperator(BaseOperator):
         fivetran_retry_limit: int = 3,
         fivetran_retry_delay: int = 1,
         poll_frequency: int = 15,
+        manual: bool = True,
         **kwargs
     ):
         super().__init__(**kwargs)
@@ -65,6 +68,7 @@ class FivetranOperator(BaseOperator):
         self.fivetran_retry_delay = fivetran_retry_delay
         self.connector_id = connector_id
         self.poll_frequency = poll_frequency
+        self.manual = manual
 
     def _get_hook(self) -> FivetranHook:
         return FivetranHook(
@@ -75,5 +79,5 @@ class FivetranOperator(BaseOperator):
 
     def execute(self, context):
         hook = self._get_hook()
-        hook.prep_connector(self.connector_id)
+        hook.prep_connector(self.connector_id, self.manual)
         return hook.start_fivetran_sync(self.connector_id)

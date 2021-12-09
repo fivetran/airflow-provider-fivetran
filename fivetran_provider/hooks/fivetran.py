@@ -213,15 +213,17 @@ class FivetranHook(BaseHook):
             json.dumps({"schedule_type": "manual"})
         )
 
-    def prep_connector(self, connector_id):
+    def prep_connector(self, connector_id, manual):
         """
         Prepare the connector to run in Airflow by checking that it exists and is a good state, then taking it off of Fivetran's schedule to be managed by Airflow's.
         :param connector_id: Fivetran connector_id, found in connector settings
             page in the Fivetran user interface.
         :type connector_id: str
+        :param manual: manual schedule flag, disable to keep connector on Fivetran schedule
+        :type manual: bool
         """
         self.check_connector(connector_id)
-        if self.get_connector(connector_id)['schedule_type'] != 'manual':
+        if manual and self.get_connector(connector_id)['schedule_type'] != 'manual':
             return self.set_manual_schedule(connector_id)
         return True
 
