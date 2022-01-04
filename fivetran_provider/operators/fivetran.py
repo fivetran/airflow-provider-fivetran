@@ -86,9 +86,10 @@ class FivetranOperator(BaseOperator):
 
 class FivetranPatientOperator(BaseOperator):
     """
-    `FivetranOperator` starts a Fivetran sync job.
+    `FivetranPatientOperator` starts a Fivetran sync job and waits until
+    it is completed or timeout limit is succeeded.
 
-    `FivetranOperator` requires that you specify the `connector_id` of the sync job to
+    `FivetranPatientOperator` requires that you specify the `connector_id` of the sync job to
     start. You can find `connector_id` in the Settings page of the connector you
     configured in the `Fivetran dashboard <https://fivetran.com/dashboard/connectors>`_.
     Note that when a Fivetran sync job is controlled via an Operator, it is no longer
@@ -98,6 +99,8 @@ class FivetranPatientOperator(BaseOperator):
     :param fivetran_conn_id: `Conn ID` of the Connection to be used to configure
         the hook.
     :type fivetran_conn_id: Optional[str]
+    :param timeout_seconds: Timeout of polling sync
+    :type timeout_seconds: int
     :param fivetran_retry_limit: # of retries when encountering API errors
     :type fivetran_retry_limit: Optional[int]
     :param fivetran_retry_delay: Time to wait before retrying API request
@@ -105,6 +108,9 @@ class FivetranPatientOperator(BaseOperator):
     :param connector_id: ID of the Fivetran connector to sync, found on the
         Connector settings page.
     :type connector_id: str
+    :param poll_frequency: Frequency to poll (in seconds) to see if the sync
+        is completed.
+    :type poll_frequency: int
     :param manual: manual schedule flag, Default is true, to take connector off Fivetran schedule. Set to false to disable and keep connector on Fivetran schedule
     :type manual: bool
     """
