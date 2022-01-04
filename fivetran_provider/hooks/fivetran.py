@@ -225,9 +225,9 @@ class FivetranHook(BaseHook):
         :type manual: bool
         """
         self.check_connector(connector_id)
-        if manual and self.get_connector(connector_id)['schedule_type'] == 'auto':
+        if manual and self.get_connector(connector_id)["schedule_type"] == "auto":
             return self.set_connector_schedule(connector_id, "manual")
-        if not manual and self.get_connector(connector_id)['schedule_type'] == 'manual':
+        if not manual and self.get_connector(connector_id)["schedule_type"] == "manual":
             return self.set_connector_schedule(connector_id, "auto")
         return True
 
