@@ -197,7 +197,7 @@ class FivetranHook(BaseHook):
         )
         return True
 
-    def set_manual_schedule(self, connector_id):
+    def set_connector_schedule(self, connector_id, schedule_type):
         """
         Set connector to manual sync mode, required to force sync through the API.
             Syncs will no longer be performed automatically and must be started
@@ -206,11 +206,13 @@ class FivetranHook(BaseHook):
         :param connector_id: Fivetran connector_id, found in connector settings
             page in the Fivetran user interface.
         :type connector_id: str
+        :param schedule_type: Either "manual" (sync schedule only controlled via Airlow) or "auto" (sync schedule controlled via Fivetran)
+        :type schedule_type: str
         """
         endpoint = self.api_path_connectors + connector_id
         return self._do_api_call(
             ("PATCH", endpoint),
-            json.dumps({"schedule_type": "manual"})
+            json.dumps({"schedule_type": schedule_type})
         )
 
     def prep_connector(self, connector_id, manual):
@@ -223,8 +225,10 @@ class FivetranHook(BaseHook):
         :type manual: bool
         """
         self.check_connector(connector_id)
-        if manual and self.get_connector(connector_id)['schedule_type'] != 'manual':
-            return self.set_manual_schedule(connector_id)
+        if manual and self.get_connector(connector_id)['schedule_type'] == 'auto':
+            return self.set_connector_schedule(connector_id, "manual")
+        if not manual and self.get_connector(connector_id)['schedule_type'] == 'manual':
+            return self.set_connector_schedule(connector_id, "auto")
         return True
 
     def start_fivetran_sync(self, connector_id):
