@@ -1,3 +1,4 @@
+from airflow.exceptions import AirflowException
 from airflow.models import BaseOperator, BaseOperatorLink
 from airflow.utils.decorators import apply_defaults
 
@@ -155,6 +156,8 @@ class FivetranPatientOperator(BaseOperator):
         hook.prep_connector(self.connector_id, self.manual)
         hook.start_fivetran_sync(self.connector_id)
 
+        self.log.info(f'Connector "{self.connector_id}": Sync triggered')
+
         timeout = time.time() + self.timeout_seconds
 
         sync_status = False
@@ -163,4 +166,10 @@ class FivetranPatientOperator(BaseOperator):
                 self.previous_completed_at = hook.get_last_sync(self.connector_id)
             sync_status = hook.get_sync_status(self.connector_id, self.previous_completed_at)
             time.sleep(self.poll_frequency)
-        return sync_status
+
+        if not sync_status:
+            raise AirflowException(
+                f'Timeout exceeded. Marking connector "{self.connector_id}" as failed')
+        else:
+            self.log.info(f'Connector "{self.connector_id}": Sync complete')
+            return sync_status
