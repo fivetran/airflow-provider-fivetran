@@ -32,7 +32,7 @@ class FivetranHook(BaseHook):
     default_conn_name = 'fivetran_default'
     conn_type = 'fivetran'
     hook_name = 'Fivetran'
-    api_user_agent = 'airflow_provider_fivetran/1.0.1'
+    api_user_agent = 'airflow_provider_fivetran/1.0.3'
     api_protocol = 'https'
     api_host = 'api.fivetran.com'
     api_path_connectors = 'v1/connectors/'
@@ -197,7 +197,7 @@ class FivetranHook(BaseHook):
         )
         return True
 
-    def set_manual_schedule(self, connector_id):
+    def set_schedule_type(self, connector_id, schedule_type):
         """
         Set connector to manual sync mode, required to force sync through the API.
             Syncs will no longer be performed automatically and must be started
@@ -210,7 +210,7 @@ class FivetranHook(BaseHook):
         endpoint = self.api_path_connectors + connector_id
         return self._do_api_call(
             ("PATCH", endpoint),
-            json.dumps({"schedule_type": "manual"})
+            json.dumps({"schedule_type": schedule_type})
         )
 
     def prep_connector(self, connector_id, manual):
@@ -223,8 +223,8 @@ class FivetranHook(BaseHook):
         :type manual: bool
         """
         self.check_connector(connector_id)
-        if manual and self.get_connector(connector_id)['schedule_type'] != 'manual':
-            return self.set_manual_schedule(connector_id)
+        if self.get_connector(connector_id)['schedule_type'] != schedule_type:
+            return self.set_schedule_type(connector_id, schedule_type)
         return True
 
     def start_fivetran_sync(self, connector_id):
@@ -234,6 +234,15 @@ class FivetranHook(BaseHook):
         :type connector_id: str
         """
         endpoint = self.api_path_connectors + connector_id + "/force"
+        return self._do_api_call(("POST", endpoint))
+
+    def start_fivetran_resync(self, connector_id):
+        """
+        :param connector_id: Fivetran connector_id, found in connector settings
+            page in the Fivetran user interface.
+        :type connector_id: str
+        """
+        endpoint = self.api_path_connectors + connector_id + "/schemas/tables/resync"
         return self._do_api_call(("POST", endpoint))
 
     def get_last_sync(self, connector_id):
