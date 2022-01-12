@@ -40,7 +40,7 @@ class FivetranOperator(BaseOperator):
     :param connector_id: ID of the Fivetran connector to sync, found on the
         Connector settings page.
     :type connector_id: str
-    :param schedule_type: schedule type. Default is manual which takes the connector off Fivetran schedule. Set to "auto" to keep connector on Fivetran schedule
+    :param schedule_type: schedule type. Default is "manual" which takes the connector off Fivetran schedule. Set to "auto" to keep connector on Fivetran schedule.
     :type schedule_type: str
     """
 

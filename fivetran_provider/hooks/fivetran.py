@@ -215,11 +215,11 @@ class FivetranHook(BaseHook):
 
     def prep_connector(self, connector_id, schedule_type):
         """
-        Prepare the connector to run in Airflow by checking that it exists and is a good state. Update connector sync schedule type if parameter conflicts with current.
+        Prepare the connector to run in Airflow by checking that it exists and is a good state, then update connector sync schedule type if changed.
         :param connector_id: Fivetran connector_id, found in connector settings
             page in the Fivetran user interface.
         :type connector_id: str
-        :param schedule_type: connector schedule type ("auto" or "manual).
+        :param schedule_type: Fivetran connector schedule type
         :type schedule_type: str
         """
         self.check_connector(connector_id)
