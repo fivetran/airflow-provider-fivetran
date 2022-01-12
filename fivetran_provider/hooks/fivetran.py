@@ -223,6 +223,8 @@ class FivetranHook(BaseHook):
         :type schedule_type: str
         """
         self.check_connector(connector_id)
+        if schedule_type not in {"manual", "auto"}:
+            raise ValueError('schedule_type must be either "manual" or "auto"')
         if self.get_connector(connector_id)["schedule_type"] != schedule_type:
             return self.set_schedule_type(connector_id, schedule_type)
         return True
