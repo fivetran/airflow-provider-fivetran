@@ -197,11 +197,9 @@ class FivetranHook(BaseHook):
         )
         return True
 
-    def set_connector_schedule(self, connector_id, schedule_type):
+    def set_schedule_type(self, connector_id, schedule_type):
         """
-        Set connector to manual sync mode, required to force sync through the API.
-            Syncs will no longer be performed automatically and must be started
-            via the API.
+        Set connector sync mode to switch sync control between API and UI.
 
         :param connector_id: Fivetran connector_id, found in connector settings
             page in the Fivetran user interface.
@@ -215,20 +213,18 @@ class FivetranHook(BaseHook):
             json.dumps({"schedule_type": schedule_type})
         )
 
-    def prep_connector(self, connector_id, manual):
+    def prep_connector(self, connector_id, schedule_type):
         """
-        Prepare the connector to run in Airflow by checking that it exists and is a good state, then taking it off of Fivetran's schedule to be managed by Airflow's.
+        Prepare the connector to run in Airflow by checking that it exists and is a good state. Update connector sync schedule type if parameter conflicts with current.
         :param connector_id: Fivetran connector_id, found in connector settings
             page in the Fivetran user interface.
         :type connector_id: str
-        :param manual: manual schedule flag, disable to keep connector on Fivetran schedule
-        :type manual: bool
+        :param schedule_type: connector schedule type ("auto" or "manual).
+        :type schedule_type: str
         """
         self.check_connector(connector_id)
-        if manual and self.get_connector(connector_id)["schedule_type"] == "auto":
-            return self.set_connector_schedule(connector_id, "manual")
-        if not manual and self.get_connector(connector_id)["schedule_type"] == "manual":
-            return self.set_connector_schedule(connector_id, "auto")
+        if self.get_connector(connector_id)["schedule_type"] != schedule_type:
+            return self.set_schedule_type(connector_id, schedule_type)
         return True
 
     def start_fivetran_sync(self, connector_id):
