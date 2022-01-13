@@ -14,7 +14,6 @@ from airflow.hooks.base_hook import BaseHook
 class FivetranHook(BaseHook):
     """
     Fivetran API interaction hook.
-
     :param fivetran_conn_id: `Conn ID` of the Connection to be used to
         configure this hook.
     :type fivetran_conn_id: str
@@ -72,7 +71,6 @@ class FivetranHook(BaseHook):
     def _do_api_call(self, endpoint_info, json=None):
         """
         Utility function to perform an API call with retries
-
         :param endpoint_info: Tuple of method and endpoint
         :type endpoint_info: tuple[string, string]
         :param json: Parameters for this API call.
@@ -156,7 +154,6 @@ class FivetranHook(BaseHook):
     def get_connector(self, connector_id):
         """
         Fetches the detail of a connector.
-
         :param connector_id: Fivetran connector_id, found in connector settings
             page in the Fivetran user interface.
         :type connector_id: str
@@ -173,7 +170,6 @@ class FivetranHook(BaseHook):
         """
         Ensures connector configuration has been completed successfully and is in
             a functional state.
-
         :param connector_id: Fivetran connector_id, found in connector settings
             page in the Fivetran user interface.
         :type connector_id: str
@@ -200,7 +196,6 @@ class FivetranHook(BaseHook):
     def set_schedule_type(self, connector_id, schedule_type):
         """
         Set connector sync mode to switch sync control between API and UI.
-
         :param connector_id: Fivetran connector_id, found in connector settings
             page in the Fivetran user interface.
         :type connector_id: str
@@ -242,7 +237,6 @@ class FivetranHook(BaseHook):
         """
         Get the last time Fivetran connector completed a sync.
             Used with FivetranSensor to monitor sync completion status.
-
         :param connector_id: Fivetran connector_id, found in connector settings
             page in the Fivetran user interface.
         :type connector_id: str
@@ -299,7 +293,6 @@ class FivetranHook(BaseHook):
         """
         Returns either the pendulum-parsed actual timestamp or
             a very out-of-date timestamp if not set
-
         :param api_time: timestamp format as returned by the Fivetran API.
         :type api_time: str
         :rtype: Pendulum.DateTime
