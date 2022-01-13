@@ -14,7 +14,6 @@ from airflow.hooks.base_hook import BaseHook
 class FivetranHook(BaseHook):
     """
     Fivetran API interaction hook.
-
     :param fivetran_conn_id: `Conn ID` of the Connection to be used to
         configure this hook.
     :type fivetran_conn_id: str
@@ -32,7 +31,7 @@ class FivetranHook(BaseHook):
     default_conn_name = 'fivetran_default'
     conn_type = 'fivetran'
     hook_name = 'Fivetran'
-    api_user_agent = 'airflow_provider_fivetran/1.0.3'
+    api_user_agent = 'airflow_provider_fivetran/1.0.1'
     api_protocol = 'https'
     api_host = 'api.fivetran.com'
     api_path_connectors = 'v1/connectors/'
@@ -72,7 +71,6 @@ class FivetranHook(BaseHook):
     def _do_api_call(self, endpoint_info, json=None):
         """
         Utility function to perform an API call with retries
-
         :param endpoint_info: Tuple of method and endpoint
         :type endpoint_info: tuple[string, string]
         :param json: Parameters for this API call.
@@ -156,7 +154,6 @@ class FivetranHook(BaseHook):
     def get_connector(self, connector_id):
         """
         Fetches the detail of a connector.
-
         :param connector_id: Fivetran connector_id, found in connector settings
             page in the Fivetran user interface.
         :type connector_id: str
@@ -173,7 +170,6 @@ class FivetranHook(BaseHook):
         """
         Ensures connector configuration has been completed successfully and is in
             a functional state.
-
         :param connector_id: Fivetran connector_id, found in connector settings
             page in the Fivetran user interface.
         :type connector_id: str
@@ -199,13 +195,12 @@ class FivetranHook(BaseHook):
 
     def set_schedule_type(self, connector_id, schedule_type):
         """
-        Set connector to manual sync mode, required to force sync through the API.
-            Syncs will no longer be performed automatically and must be started
-            via the API.
-
+        Set connector sync mode to switch sync control between API and UI.
         :param connector_id: Fivetran connector_id, found in connector settings
             page in the Fivetran user interface.
         :type connector_id: str
+        :param schedule_type: Either "manual" (sync schedule only controlled via Airlow) or "auto" (sync schedule controlled via Fivetran)
+        :type schedule_type: str
         """
         endpoint = self.api_path_connectors + connector_id
         return self._do_api_call(
@@ -213,17 +208,19 @@ class FivetranHook(BaseHook):
             json.dumps({"schedule_type": schedule_type})
         )
 
-    def prep_connector(self, connector_id, manual):
+    def prep_connector(self, connector_id, schedule_type):
         """
-        Prepare the connector to run in Airflow by checking that it exists and is a good state, then taking it off of Fivetran's schedule to be managed by Airflow's.
+        Prepare the connector to run in Airflow by checking that it exists and is a good state, then update connector sync schedule type if changed.
         :param connector_id: Fivetran connector_id, found in connector settings
             page in the Fivetran user interface.
         :type connector_id: str
-        :param manual: manual schedule flag, disable to keep connector on Fivetran schedule
-        :type manual: bool
+        :param schedule_type: Fivetran connector schedule type
+        :type schedule_type: str
         """
         self.check_connector(connector_id)
-        if self.get_connector(connector_id)['schedule_type'] != schedule_type:
+        if schedule_type not in {"manual", "auto"}:
+            raise ValueError('schedule_type must be either "manual" or "auto"')
+        if self.get_connector(connector_id)["schedule_type"] != schedule_type:
             return self.set_schedule_type(connector_id, schedule_type)
         return True
 
@@ -236,20 +233,10 @@ class FivetranHook(BaseHook):
         endpoint = self.api_path_connectors + connector_id + "/force"
         return self._do_api_call(("POST", endpoint))
 
-    def start_fivetran_resync(self, connector_id):
-        """
-        :param connector_id: Fivetran connector_id, found in connector settings
-            page in the Fivetran user interface.
-        :type connector_id: str
-        """
-        endpoint = self.api_path_connectors + connector_id + "/schemas/tables/resync"
-        return self._do_api_call(("POST", endpoint))
-
     def get_last_sync(self, connector_id):
         """
         Get the last time Fivetran connector completed a sync.
             Used with FivetranSensor to monitor sync completion status.
-
         :param connector_id: Fivetran connector_id, found in connector settings
             page in the Fivetran user interface.
         :type connector_id: str
@@ -306,7 +293,6 @@ class FivetranHook(BaseHook):
         """
         Returns either the pendulum-parsed actual timestamp or
             a very out-of-date timestamp if not set
-
         :param api_time: timestamp format as returned by the Fivetran API.
         :type api_time: str
         :rtype: Pendulum.DateTime
