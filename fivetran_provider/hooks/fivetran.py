@@ -31,7 +31,7 @@ class FivetranHook(BaseHook):
     default_conn_name = 'fivetran_default'
     conn_type = 'fivetran'
     hook_name = 'Fivetran'
-    api_user_agent = 'airflow_provider_fivetran/1.0.1'
+    api_user_agent = 'airflow_provider_fivetran/1.0.3'
     api_protocol = 'https'
     api_host = 'api.fivetran.com'
     api_path_connectors = 'v1/connectors/'
