@@ -1,4 +1,4 @@
-from airflow.sensors.base import BaseSensorOperator
+from airflow.sensors.base_sensor_operator import BaseSensorOperator
 from airflow.utils.decorators import apply_defaults
 
 from fivetran_provider.hooks.fivetran import FivetranHook

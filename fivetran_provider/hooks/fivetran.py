@@ -8,7 +8,7 @@ from requests.auth import AuthBase
 import pendulum
 
 from airflow.exceptions import AirflowException
-from airflow.hooks.base import BaseHook
+from airflow.hooks.base_hook import BaseHook
 
 
 class FivetranHook(BaseHook):
