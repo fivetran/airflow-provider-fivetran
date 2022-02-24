@@ -125,7 +125,7 @@ class FivetranPatientOperator(BaseOperator):
     def __init__(
         self,
         connector_id: str,
-        timeout_seconds: int,
+        timeout_seconds: int = 300,
         run_name: Optional[str] = None,
         fivetran_conn_id: str = "fivetran",
         fivetran_retry_limit: int = 3,
