@@ -17,7 +17,7 @@ pip install airflow-provider-fivetran
 In the Airflow user interface, configure a Connection for Fivetran. Most of the Connection config fields will be left blank. Configure the following fields:
 
 * `Conn Id`: `fivetran`
-* `Conn Type`: `HTTP`
+* `Conn Type`: `Fivetran`
 * `Login`: Fivetran API Key
 * `Password`: Fivetran API Secret
 
@@ -66,4 +66,3 @@ We are happy to hear from you. Please email any feedback to the authors at [devr
 ## Acknowledgements
 
 Special thanks to [Pete DeJoy](https://github.com/petedejoy), [Plinio Guzman](https://github.com/pgzmnk), and [David Koenitzer](https://github.com/sunkickr) of [Astronomer.io](https://www.astronomer.io/) for their contributions and support in getting this provider off the ground.
-
