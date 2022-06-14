@@ -231,9 +231,15 @@ class FivetranHook(BaseHook):
         :type connector_id: str
         """
         endpoint = self.api_path_connectors + connector_id + "/force"
-        return self._do_api_call(("POST", endpoint))
+        self._do_api_call(("POST", endpoint))
+        connector_details = self.get_connector(connector_id)
+        succeeded_at = connector_details["succeeded_at"]
+        failed_at = connector_details["failed_at"]
+        last_sync = succeeded_at if succeeded_at > failed_at else failed_at
+        
+        return last_sync
 
-    def get_last_sync(self, connector_id):
+    def get_last_sync(self, connector_id, xcom=""):
         """
         Get the last time Fivetran connector completed a sync.
             Used with FivetranSensor to monitor sync completion status.
@@ -241,10 +247,14 @@ class FivetranHook(BaseHook):
             page in the Fivetran user interface.
         :type connector_id: str
         """
-        connector_details = self.get_connector(connector_id)
-        succeeded_at = self._parse_timestamp(connector_details["succeeded_at"])
-        failed_at = self._parse_timestamp(connector_details["failed_at"])
-        return succeeded_at if succeeded_at > failed_at else failed_at
+        if xcom:
+          last_sync = self._parse_timestamp(xcom)
+        else:
+            connector_details = self.get_connector(connector_id)
+            succeeded_at = self._parse_timestamp(connector_details["succeeded_at"])
+            failed_at = self._parse_timestamp(connector_details["failed_at"])
+            last_sync = succeeded_at if succeeded_at > failed_at else failed_at
+        return last_sync
 
     def get_sync_status(self, connector_id, previous_completed_at):
         """
@@ -264,7 +274,15 @@ class FivetranHook(BaseHook):
         current_completed_at = (
             succeeded_at if succeeded_at > failed_at else failed_at
         )
+        
+        self.log.info('Connector prev: "{}"'.format(
+                previous_completed_at)
+        )
 
+        self.log.info('Connector curr: "{}"'.format(
+                current_completed_at)
+        )
+        
         # The only way to tell if a sync failed is to check if its latest
         # failed_at value is greater than then last known "sync completed at" value.
         if failed_at > previous_completed_at:
@@ -313,3 +331,4 @@ def _retryable_error(exception) -> bool:
         or exception.response is not None
         and exception.response.status_code >= 500
     )
+

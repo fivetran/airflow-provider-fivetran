@@ -37,7 +37,7 @@ class FivetranSensor(BaseSensorOperator):
     """
 
     # Define which fields get jinjaified
-    template_fields = ["connector_id"]
+    template_fields = ["connector_id", "xcom"]
 
     @apply_defaults
     def __init__(
@@ -47,6 +47,7 @@ class FivetranSensor(BaseSensorOperator):
         poke_interval: int = 60,
         fivetran_retry_limit: int = 3,
         fivetran_retry_delay: int = 1,
+        xcom: str = "",
         **kwargs: Any
     ) -> None:
         super().__init__(**kwargs)
@@ -57,7 +58,7 @@ class FivetranSensor(BaseSensorOperator):
         self.fivetran_retry_limit = fivetran_retry_limit
         self.fivetran_retry_delay = fivetran_retry_delay
         self.hook = None
-
+        self.xcom = xcom
     def _get_hook(self) -> FivetranHook:
         if self.hook is None:
             self.hook = FivetranHook(
@@ -70,5 +71,5 @@ class FivetranSensor(BaseSensorOperator):
     def poke(self, context):
         hook = self._get_hook()
         if self.previous_completed_at is None:
-            self.previous_completed_at = hook.get_last_sync(self.connector_id)
+            self.previous_completed_at = hook.get_last_sync(self.connector_id, self.xcom)
         return hook.get_sync_status(self.connector_id, self.previous_completed_at)
