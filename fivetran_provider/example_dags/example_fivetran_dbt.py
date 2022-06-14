@@ -16,8 +16,8 @@ with DAG(
     dag_id="ad_reporting_dag",
     default_args=default_args,
     schedule_interval=timedelta(days=1),
-    catchup=False
-    ) as dag:
+    catchup=False,
+) as dag:
 
     linkedin_sync = FivetranOperator(
         task_id="linkedin-ads-sync",

@@ -12,7 +12,7 @@ default_args = {
 }
 
 dag = DAG(
-    dag_id='example_fivetran',
+    dag_id="example_fivetran",
     default_args=default_args,
     schedule_interval=timedelta(days=1),
     catchup=False,
@@ -20,14 +20,14 @@ dag = DAG(
 
 with dag:
     fivetran_sync_start = FivetranOperator(
-        task_id='fivetran-task',
-        fivetran_conn_id='fivetran_default',
+        task_id="fivetran-task",
+        fivetran_conn_id="fivetran_default",
         connector_id="{{ var.value.connector_id }}",
     )
 
     fivetran_sync_wait = FivetranSensor(
-        task_id='fivetran-sensor',
-        fivetran_conn_id='fivetran_default',
+        task_id="fivetran-sensor",
+        fivetran_conn_id="fivetran_default",
         connector_id="{{ var.value.connector_id }}",
         poke_interval=5,
     )

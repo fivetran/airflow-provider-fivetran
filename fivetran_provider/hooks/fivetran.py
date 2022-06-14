@@ -27,39 +27,39 @@ class FivetranHook(BaseHook):
     :type retry_delay: float
     """
 
-    conn_name_attr = 'fivetran_conn_id'
-    default_conn_name = 'fivetran_default'
-    conn_type = 'fivetran'
-    hook_name = 'Fivetran'
-    api_user_agent = 'airflow_provider_fivetran/1.0.3'
-    api_protocol = 'https'
-    api_host = 'api.fivetran.com'
-    api_path_connectors = 'v1/connectors/'
+    conn_name_attr = "fivetran_conn_id"
+    default_conn_name = "fivetran_default"
+    conn_type = "fivetran"
+    hook_name = "Fivetran"
+    api_user_agent = "airflow_provider_fivetran/1.0.3"
+    api_protocol = "https"
+    api_host = "api.fivetran.com"
+    api_path_connectors = "v1/connectors/"
 
     @staticmethod
     def get_ui_field_behaviour() -> Dict:
         """Returns custom field behaviour"""
         return {
-            "hidden_fields": ['schema', 'port', 'extra', 'host'],
+            "hidden_fields": ["schema", "port", "extra", "host"],
             "relabeling": {
-                'login': 'Fivetran API Key',
-                'password': 'Fivetran API Secret',
+                "login": "Fivetran API Key",
+                "password": "Fivetran API Secret",
             },
             "placeholders": {
-                'login': 'api key',
-                'password': 'api secret',
+                "login": "api key",
+                "password": "api secret",
             },
         }
 
     def __init__(
         self,
         fivetran_conn_id: str = "fivetran",
-        fivetran_conn = None,
+        fivetran_conn=None,
         timeout_seconds: int = 180,
         retry_limit: int = 3,
         retry_delay: float = 1.0,
     ) -> None:
-        super().__init__(None) # Passing None fixes a runtime problem in Airflow 1
+        super().__init__(None)  # Passing None fixes a runtime problem in Airflow 1
         self.conn_id = fivetran_conn_id
         self.fivetran_conn = fivetran_conn
         self.timeout_seconds = timeout_seconds
@@ -86,9 +86,7 @@ class FivetranHook(BaseHook):
         auth = (self.fivetran_conn.login, self.fivetran_conn.password)
         url = f"{self.api_protocol}://{self.api_host}/{endpoint}"
 
-        headers = {
-            "User-Agent": self.api_user_agent
-        }
+        headers = {"User-Agent": self.api_user_agent}
 
         if method == "GET":
             request_func = requests.get
@@ -108,7 +106,7 @@ class FivetranHook(BaseHook):
                     data=json if method in ("POST", "PATCH") else None,
                     params=json if method in ("GET") else None,
                     auth=auth,
-                    headers=headers
+                    headers=headers,
                 )
                 response.raise_for_status()
                 return response.json()
@@ -157,6 +155,7 @@ class FivetranHook(BaseHook):
         :param connector_id: Fivetran connector_id, found in connector settings
             page in the Fivetran user interface.
         :type connector_id: str
+        :return: connector details
         :rtype: Dict
         """
         if connector_id == "":
@@ -164,7 +163,6 @@ class FivetranHook(BaseHook):
         endpoint = self.api_path_connectors + connector_id
         resp = self._do_api_call(("GET", endpoint))
         return resp["data"]
-
 
     def check_connector(self, connector_id):
         """
@@ -199,18 +197,18 @@ class FivetranHook(BaseHook):
         :param connector_id: Fivetran connector_id, found in connector settings
             page in the Fivetran user interface.
         :type connector_id: str
-        :param schedule_type: Either "manual" (sync schedule only controlled via Airlow) or "auto" (sync schedule controlled via Fivetran)
+        :param schedule_type: "manual" (schedule controlled via Airlow) or "auto" (schedule controlled via Fivetran)
         :type schedule_type: str
         """
         endpoint = self.api_path_connectors + connector_id
         return self._do_api_call(
-            ("PATCH", endpoint),
-            json.dumps({"schedule_type": schedule_type})
+            ("PATCH", endpoint), json.dumps({"schedule_type": schedule_type})
         )
 
     def prep_connector(self, connector_id, schedule_type):
         """
-        Prepare the connector to run in Airflow by checking that it exists and is a good state, then update connector sync schedule type if changed.
+        Prepare the connector to run in Airflow by checking that it exists and is a good state,
+            then update connector sync schedule type if changed.
         :param connector_id: Fivetran connector_id, found in connector settings
             page in the Fivetran user interface.
         :type connector_id: str
@@ -229,6 +227,8 @@ class FivetranHook(BaseHook):
         :param connector_id: Fivetran connector_id, found in connector settings
             page in the Fivetran user interface.
         :type connector_id: str
+        :return: Timestamp of previously completed sync
+        :rtype: str
         """
         endpoint = self.api_path_connectors + connector_id + "/force"
         self._do_api_call(("POST", endpoint))
@@ -236,7 +236,7 @@ class FivetranHook(BaseHook):
         succeeded_at = connector_details["succeeded_at"]
         failed_at = connector_details["failed_at"]
         last_sync = succeeded_at if succeeded_at > failed_at else failed_at
-        
+
         return last_sync
 
     def get_last_sync(self, connector_id, xcom=""):
@@ -246,9 +246,13 @@ class FivetranHook(BaseHook):
         :param connector_id: Fivetran connector_id, found in connector settings
             page in the Fivetran user interface.
         :type connector_id: str
+        :param xcom: Timestamp as string pull from FivetranOperator via XCOM
+        :type xcom: str
+        :return: Timestamp of last completed sync
+        :rtype: Pendulum.DateTime
         """
         if xcom:
-          last_sync = self._parse_timestamp(xcom)
+            last_sync = self._parse_timestamp(xcom)
         else:
             connector_details = self.get_connector(connector_id)
             succeeded_at = self._parse_timestamp(connector_details["succeeded_at"])
@@ -271,18 +275,8 @@ class FivetranHook(BaseHook):
         connector_details = self.get_connector(connector_id)
         succeeded_at = self._parse_timestamp(connector_details["succeeded_at"])
         failed_at = self._parse_timestamp(connector_details["failed_at"])
-        current_completed_at = (
-            succeeded_at if succeeded_at > failed_at else failed_at
-        )
-        
-        self.log.info('Connector prev: "{}"'.format(
-                previous_completed_at)
-        )
+        current_completed_at = succeeded_at if succeeded_at > failed_at else failed_at
 
-        self.log.info('Connector curr: "{}"'.format(
-                current_completed_at)
-        )
-        
         # The only way to tell if a sync failed is to check if its latest
         # failed_at value is greater than then last known "sync completed at" value.
         if failed_at > previous_completed_at:
@@ -300,8 +294,10 @@ class FivetranHook(BaseHook):
         # Check if sync started by FivetranOperator has finished
         # indicated by new 'succeeded_at' timestamp
         if current_completed_at > previous_completed_at:
-            self.log.info('Connector "{}": succeeded_at: {}'.format(
-                connector_id, succeeded_at.to_iso8601_string())
+            self.log.info(
+                'Connector "{}": succeeded_at: {}'.format(
+                    connector_id, succeeded_at.to_iso8601_string()
+                )
             )
             return True
         else:
@@ -331,4 +327,3 @@ def _retryable_error(exception) -> bool:
         or exception.response is not None
         and exception.response.status_code >= 500
     )
-

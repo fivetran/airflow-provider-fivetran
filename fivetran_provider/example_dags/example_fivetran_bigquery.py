@@ -7,23 +7,25 @@ from fivetran_provider.sensors.fivetran import FivetranSensor
 from airflow.utils.dates import datetime
 
 
-TABLE='forestfires'
-DATASET='google_sheets'
+TABLE = "forestfires"
+DATASET = "google_sheets"
 # These args will get passed on to each operator
 # You can override them on a per-task basis during operator initialization
 default_args = {
-    'owner': 'astronomer',
-    'depends_on_past': False,
-    'start_date': datetime(2021, 7, 7),
-    'email': ['noreply@astronomer.io'],
-    'email_on_failure': False
+    "owner": "astronomer",
+    "depends_on_past": False,
+    "start_date": datetime(2021, 7, 7),
+    "email": ["noreply@astronomer.io"],
+    "email_on_failure": False,
 }
 
-with DAG('example_fivetran_bigquery',
-         default_args=default_args,
-         description='',
-         schedule_interval=None,
-         catchup=False) as dag:
+with DAG(
+    "example_fivetran_bigquery",
+    default_args=default_args,
+    description="",
+    schedule_interval=None,
+    catchup=False,
+) as dag:
     """
     ### Simple EL Pipeline with Data Integrity and Quality Checks
     Before running the DAG, set the following in an Airflow or Environment Variables:
@@ -44,16 +46,16 @@ with DAG('example_fivetran_bigquery',
     The FivetranSensor monitors the status of the Fivetran data sync
     """
     fivetran_sync_start = FivetranOperator(
-        task_id='fivetran-task',
-        fivetran_conn_id='fivetran_default',
-        connector_id='{{ var.value.connector_id }}'
+        task_id="fivetran-task",
+        fivetran_conn_id="fivetran_default",
+        connector_id="{{ var.value.connector_id }}",
     )
 
     fivetran_sync_wait = FivetranSensor(
-        task_id='fivetran-sensor',
-        fivetran_conn_id='fivetran_default',
-        connector_id='{{ var.value.connector_id }}',
-        poke_interval=5
+        task_id="fivetran-sensor",
+        fivetran_conn_id="fivetran_default",
+        connector_id="{{ var.value.connector_id }}",
+        poke_interval=5,
     )
 
     """
@@ -62,10 +64,10 @@ with DAG('example_fivetran_bigquery',
     exist.
     """
     validate_bigquery = BigQueryTableExistenceSensor(
-        task_id='validate_bigquery',
-        project_id='{{ var.value.gcp_project_id }}',
+        task_id="validate_bigquery",
+        project_id="{{ var.value.gcp_project_id }}",
         dataset_id=DATASET,
-        table_id='forestfires',
+        table_id="forestfires",
     )
 
     """
@@ -80,7 +82,7 @@ with DAG('example_fivetran_bigquery',
         use_legacy_sql=False,
     )
 
-    done = DummyOperator(task_id='done')
+    done = DummyOperator(task_id="done")
 
     fivetran_sync_start >> fivetran_sync_wait >> validate_bigquery
     validate_bigquery >> check_bq_row_count >> done

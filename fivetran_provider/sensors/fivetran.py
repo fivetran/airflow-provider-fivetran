@@ -34,6 +34,9 @@ class FivetranSensor(BaseSensorOperator):
     :type fivetran_retry_limit: Optional[int]
     :param fivetran_retry_delay: Time to wait before retrying API request
     :type fivetran_retry_delay: int
+    :param xcom: If used, FivetranSensor receives timestamp of previously
+        completed sync from FivetranOperator via XCOM
+    :type xcom: str
     """
 
     # Define which fields get jinjaified
@@ -59,6 +62,7 @@ class FivetranSensor(BaseSensorOperator):
         self.fivetran_retry_delay = fivetran_retry_delay
         self.hook = None
         self.xcom = xcom
+
     def _get_hook(self) -> FivetranHook:
         if self.hook is None:
             self.hook = FivetranHook(
@@ -71,5 +75,7 @@ class FivetranSensor(BaseSensorOperator):
     def poke(self, context):
         hook = self._get_hook()
         if self.previous_completed_at is None:
-            self.previous_completed_at = hook.get_last_sync(self.connector_id, self.xcom)
+            self.previous_completed_at = hook.get_last_sync(
+                self.connector_id, self.xcom
+            )
         return hook.get_sync_status(self.connector_id, self.previous_completed_at)
