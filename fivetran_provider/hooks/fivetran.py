@@ -225,7 +225,7 @@ class FivetranHook(BaseHook):
     def start_fivetran_sync(self, connector_id):
         """
         :param connector_id: Fivetran connector_id, found in connector settings
-        page in the Fivetran user interface.
+            page in the Fivetran user interface.
         :type connector_id: str
         :return: Timestamp of previously completed sync
         :rtype: str
