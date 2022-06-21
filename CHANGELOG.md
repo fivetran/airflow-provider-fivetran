@@ -3,7 +3,10 @@
 ## Upcoming 
 * (please add here)
 
-## 1.1.0 - 2022-06-15
+## 1.1.1 - 2022-06-21
+Fixed timestamp comparisons in `start_fivetran_sync` to be compare between pendulum.datetime.datetime instead of comparing strings
+
+## [1.1.0](https://github.com/fivetran/airflow-provider-fivetran/releases/tag/v1.1.0) - 2022-06-15
 Added functionality to ensure proper FivetranSensor montioring by passing timestamp from FivetranOperator via XCOM
 
 Changed return value of FivetranOperator
