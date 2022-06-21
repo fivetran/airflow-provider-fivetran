@@ -235,8 +235,11 @@ class FivetranHook(BaseHook):
         connector_details = self.get_connector(connector_id)
         succeeded_at = connector_details["succeeded_at"]
         failed_at = connector_details["failed_at"]
-        last_sync = succeeded_at if succeeded_at > failed_at else failed_at
-
+        last_sync = (
+            succeeded_at
+            if self._parse_timestamp(succeeded_at) > self._parse_timestamp(failed_at)
+            else failed_at
+        )
         return last_sync
 
     def get_last_sync(self, connector_id, xcom=""):
