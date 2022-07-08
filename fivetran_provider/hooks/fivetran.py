@@ -31,7 +31,7 @@ class FivetranHook(BaseHook):
     default_conn_name = "fivetran_default"
     conn_type = "fivetran"
     hook_name = "Fivetran"
-    api_user_agent = "airflow_provider_fivetran/1.1.1"
+    api_user_agent = "airflow_provider_fivetran/1.1.2"
     api_protocol = "https"
     api_host = "api.fivetran.com"
     api_path_connectors = "v1/connectors/"
@@ -230,11 +230,15 @@ class FivetranHook(BaseHook):
         :return: Timestamp of previously completed sync
         :rtype: str
         """
-        endpoint = self.api_path_connectors + connector_id + "/force"
-        self._do_api_call(("POST", endpoint))
         connector_details = self.get_connector(connector_id)
         succeeded_at = connector_details["succeeded_at"]
         failed_at = connector_details["failed_at"]
+        endpoint = self.api_path_connectors + connector_id
+        if self._do_api_call(("GET", endpoint))['data']['paused'] == True:
+            self._do_api_call(("PATCH", endpoint),json.dumps({"paused": False}))
+            if succeeded_at == None and failed_at == None:
+                succeeded_at = str(pendulum.now())
+        self._do_api_call(("POST", endpoint + "/force"))
         last_sync = (
             succeeded_at
             if self._parse_timestamp(succeeded_at) > self._parse_timestamp(failed_at)

@@ -3,6 +3,9 @@
 ## Upcoming 
 * (please add here)
 
+## 1.1.2 - 2022-07-08
+Added functionality to start initial syncs and syncs on paused connectors via the FivetranOperator 
+
 ## [1.1.1](https://github.com/fivetran/airflow-provider-fivetran/compare/v1.1.0...v1.1.1) - 2022-06-21
 Fixed timestamp comparisons in `start_fivetran_sync` to be compare between pendulum.datetime.datetime instead of comparing strings
 
