@@ -3,7 +3,7 @@
 ## Upcoming 
 * (please add here)
 
-## 1.1.2 - 2022-07-08
+## [1.1.2](https://github.com/fivetran/airflow-provider-fivetran/compare/v1.1.1...v1.1.2) - 2022-07-08
 Added functionality to start initial syncs and syncs on paused connectors via the FivetranOperator 
 
 ## [1.1.1](https://github.com/fivetran/airflow-provider-fivetran/compare/v1.1.0...v1.1.1) - 2022-06-21
