@@ -31,7 +31,7 @@ class FivetranHook(BaseHook):
     default_conn_name = "fivetran_default"
     conn_type = "fivetran"
     hook_name = "Fivetran"
-    api_user_agent = "airflow_provider_fivetran/1.1.2"
+    api_user_agent = "airflow_provider_fivetran/1.1.3"
     api_protocol = "https"
     api_host = "api.fivetran.com"
     api_path_connectors = "v1/connectors/"
@@ -234,8 +234,8 @@ class FivetranHook(BaseHook):
         succeeded_at = connector_details["succeeded_at"]
         failed_at = connector_details["failed_at"]
         endpoint = self.api_path_connectors + connector_id
-        if self._do_api_call(("GET", endpoint))['data']['paused'] == True:
-            self._do_api_call(("PATCH", endpoint),json.dumps({"paused": False}))
+        if self._do_api_call(("GET", endpoint))["data"]["paused"] == True:
+            self._do_api_call(("PATCH", endpoint), json.dumps({"paused": False}))
             if succeeded_at == None and failed_at == None:
                 succeeded_at = str(pendulum.now())
         self._do_api_call(("POST", endpoint + "/force"))
@@ -323,6 +323,19 @@ class FivetranHook(BaseHook):
             if api_time is not None
             else pendulum.from_timestamp(-1)
         )
+
+    def test_connection(self):
+        """
+        Ensures Airflow can reach Fivetran API
+        """
+        try:
+            resp = self._do_api_call(("GET", "v1/users"))
+            if resp["code"] == "Success":
+                return True, "Fivetran connection test passed"
+            else:
+                return False, resp
+        except Exception as e:
+            return False, str(e)
 
 
 def _retryable_error(exception) -> bool:
