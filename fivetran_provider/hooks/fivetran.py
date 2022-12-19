@@ -164,6 +164,21 @@ class FivetranHook(BaseHook):
         resp = self._do_api_call(("GET", endpoint))
         return resp["data"]
 
+    def get_connector_schemas(self, connector_id):
+        """
+        Fetches schema information of the connector.
+        :param connector_id: Fivetran connector_id, found in connector settings
+            page in the Fivetran user interface.
+        :type connector_id: str
+        :return: connector details
+        :rtype: Dict
+        """
+        if connector_id == "":
+            raise ValueError("No value specified for connector_id")
+        endpoint = self.api_path_connectors + connector_id + "/schemas"
+        resp = self._do_api_call(("GET", endpoint))
+        return resp["data"]
+
     def check_connector(self, connector_id):
         """
         Ensures connector configuration has been completed successfully and is in

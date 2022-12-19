@@ -2,6 +2,8 @@ from airflow.models import BaseOperator, BaseOperatorLink
 from airflow.utils.decorators import apply_defaults
 
 from fivetran_provider.hooks.fivetran import FivetranHook
+from openlineage.airflow.extractors.base import OperatorLineage
+from openlineage.common.dataset import Dataset, Field, Source
 from typing import Optional
 
 
@@ -81,3 +83,56 @@ class FivetranOperator(BaseOperator):
         hook = self._get_hook()
         hook.prep_connector(self.connector_id, self.schedule_type)
         return hook.start_fivetran_sync(self.connector_id)
+
+    def _get_fields(self, table) -> Optional[Field]:
+        if table["columns"]:
+            return [
+                Field(
+                    name=col["name_in_destination"],
+                    type="",
+                )
+                for col in table["columns"].values()
+            ]
+        return None
+
+    def _get_openlineage_facets_on_complete(self) -> OperatorLineage:
+        facets = OperatorLineage()
+        hook = self._get_hook()
+        connector_resp = hook.get_connector(self.connector_id)
+        schema_resp = hook.get_connector_schemas(self.connector_id)
+
+        for schema in schema_resp["schemas"]:
+
+            source = Source(
+                scheme="fivetran",
+                authority=connector_resp["source_sync_details"]["accounts"][0],
+                connection_url=self.get_connection_uri(hook.fivetran_conn),
+                name=schema["name_in_destination"],
+            )
+
+        """
+        inputs = [
+            Dataset(
+                source=source,
+                name="",
+            ) for schema in schema_resp["schemas"]
+        ]
+        """
+
+        outputs = [
+            Dataset(
+                source=source,
+                name=table["name_in_destination"],
+                fields=self._get_fields(table),
+            )
+            for table in schema["tables"]
+        ]
+
+        job_facets = {}
+        run_facets = {}
+
+        facets.inputs = []  # [ds.to_openlineage_dataset() for ds in inputs]
+        facets.outputs = [ds.to_openlineage_dataset() for ds in outputs]
+        facets.job_facets = job_facets
+        facets.run_facets = run_facets
+        return facets
