@@ -33,7 +33,7 @@ MOCK_FIVETRAN_RESPONSE_PAYLOAD = {
         "connected_by": "mournful_shalt",
         "created_at": "2021-03-05T22:58:56.238875Z",
         "succeeded_at": "2021-03-23T20:55:12.670390Z",
-        "failed_at": 'null',
+        "failed_at": "null",
         "sync_frequency": 360,
         "schedule_type": "manual",
         "status": {
@@ -42,7 +42,7 @@ MOCK_FIVETRAN_RESPONSE_PAYLOAD = {
             "update_state": "on_schedule",
             "is_historical_sync": False,
             "tasks": [],
-            "warnings": []
+            "warnings": [],
         },
         "config": {
             "latest_version": "1",
@@ -50,17 +50,51 @@ MOCK_FIVETRAN_RESPONSE_PAYLOAD = {
             "named_range": "fivetran_test_range",
             "authorization_method": "User OAuth",
             "service_version": "1",
-            "last_synced_changes__utc_": "2021-03-23 20:54"
-        }
-    }
+            "last_synced_changes__utc_": "2021-03-23 20:54",
+        },
+    },
+}
+
+MOCK_FIVETRAN_SCHEMA_RESPONSE_PAYLOAD = {
+    "code": "Success",
+    "data": {
+        "enable_new_by_default": True,
+        "schema_change_handling": "ALLOW_ALL",
+        "schemas": {
+            "google_sheets.fivetran_google_sheets_spotify": {
+                "name_in_destination": "google_sheets.fivetran_google_sheets_spotify",
+                "enabled": True,
+                "tables": {
+                    "table_1": {
+                        "name_in_destination": "table_1",
+                        "enabled": True,
+                        "sync_mode": "SOFT_DELETE",
+                        "enabled_patch_settings": {"allowed": True},
+                        "columns": {
+                            "column_1": {
+                                "name_in_destination": "column_1",
+                                "enabled": True,
+                                "hashed": False,
+                                "enabled_patch_settings": {
+                                    "allowed": False,
+                                    "reason_code": "SYSTEM_COLUMN",
+                                    "reason": "The column does not support exclusion as it is a Primary Key",
+                                },
+                            },
+                        },
+                    }
+                },
+            }
+        },
+    },
 }
 
 
 # Mock the `conn_fivetran` Airflow connection (note the `@` after `API_SECRET`)
-@mock.patch.dict('os.environ', AIRFLOW_CONN_CONN_FIVETRAN='http://API_KEY:API_SECRET@')
+@mock.patch.dict("os.environ", AIRFLOW_CONN_CONN_FIVETRAN="http://API_KEY:API_SECRET@")
 class TestFivetranHook(unittest.TestCase):
-    """ 
-    Test functions for Fivetran Hook. 
+    """
+    Test functions for Fivetran Hook.
 
     Mocks responses from Fivetran API.
     """
@@ -68,31 +102,53 @@ class TestFivetranHook(unittest.TestCase):
     @requests_mock.mock()
     def test_get_connector(self, m):
 
-        m.get('https://api.fivetran.com/v1/connectors/interchangeable_revenge',
-              json=MOCK_FIVETRAN_RESPONSE_PAYLOAD)
-
-        hook = FivetranHook(
-            fivetran_conn_id='conn_fivetran',
+        m.get(
+            "https://api.fivetran.com/v1/connectors/interchangeable_revenge",
+            json=MOCK_FIVETRAN_RESPONSE_PAYLOAD,
         )
 
-        result = hook.get_connector(connector_id='interchangeable_revenge')
+        hook = FivetranHook(
+            fivetran_conn_id="conn_fivetran",
+        )
 
-        assert result['status']['setup_state'] == 'connected'
+        result = hook.get_connector(connector_id="interchangeable_revenge")
+
+        assert result["status"]["setup_state"] == "connected"
+
+    @requests_mock.mock()
+    def test_get_connector_schemas(self, m):
+
+        m.get(
+            "https://api.fivetran.com/v1/connectors/interchangeable_revenge/schemas",
+            json=MOCK_FIVETRAN_SCHEMA_RESPONSE_PAYLOAD,
+        )
+
+        hook = FivetranHook(
+            fivetran_conn_id="conn_fivetran",
+        )
+
+        result = hook.get_connector_schemas(connector_id="interchangeable_revenge")
+
+        assert result["schemas"]["google_sheets.fivetran_google_sheets_spotify"][
+            "enabled"
+        ]
 
     @requests_mock.mock()
     def test_start_fivetran_sync(self, m):
 
-        m.post('https://api.fivetran.com/v1/connectors/interchangeable_revenge/force',
-               json=MOCK_FIVETRAN_RESPONSE_PAYLOAD)
-
-        hook = FivetranHook(
-            fivetran_conn_id='conn_fivetran',
+        m.post(
+            "https://api.fivetran.com/v1/connectors/interchangeable_revenge/force",
+            json=MOCK_FIVETRAN_RESPONSE_PAYLOAD,
         )
 
-        result = hook.start_fivetran_sync(connector_id='interchangeable_revenge')
+        hook = FivetranHook(
+            fivetran_conn_id="conn_fivetran",
+        )
 
-        assert result['code'] == 'Success'
+        result = hook.start_fivetran_sync(connector_id="interchangeable_revenge")
+
+        assert result["code"] == "Success"
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
