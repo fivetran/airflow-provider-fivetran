@@ -2,7 +2,7 @@ from airflow.models import BaseOperator, BaseOperatorLink
 from airflow.utils.decorators import apply_defaults
 
 from fivetran_provider.hooks.fivetran import FivetranHook
-from openlineage.airflow.extractors.base import OperatorLineage
+from openlineage.airflow.extractors.base import BaseExtractor, OperatorLineage
 from openlineage.common.dataset import Dataset, Field, Source
 from typing import Optional
 
@@ -85,7 +85,7 @@ class FivetranOperator(BaseOperator):
         return hook.start_fivetran_sync(self.connector_id)
 
     def _get_fields(self, table) -> Optional[Field]:
-        if table["columns"]:
+        if table.get("columns"):
             return [
                 Field(
                     name=col["name_in_destination"],
@@ -95,43 +95,52 @@ class FivetranOperator(BaseOperator):
             ]
         return None
 
-    def _get_openlineage_facets_on_complete(self) -> OperatorLineage:
+    def _get_input_name(self, config, service) -> str:
+        if service == "gcs":
+            return f"{config['bucket']}/{config['prefix']}{config['pattern']}"
+        elif service == "google_sheets":
+            return config['sheet_id']
+        else:
+            raise ValueError(f"Service: {service} not supported by extractor.")
+
+    def get_openlineage_facets_on_complete(self, task_instance) -> OperatorLineage:
         facets = OperatorLineage()
         hook = self._get_hook()
         connector_resp = hook.get_connector(self.connector_id)
         schema_resp = hook.get_connector_schemas(self.connector_id)
+        config = connector_resp["config"]
+        input_name = self._get_input_name(config, connector_resp["service"])
+        inputs = []
+        outputs = []
 
-        for schema in schema_resp["schemas"]:
+        for schema in schema_resp["schemas"].values():
 
             source = Source(
                 scheme="fivetran",
-                authority=connector_resp["source_sync_details"]["accounts"][0],
-                connection_url=self.get_connection_uri(hook.fivetran_conn),
-                name=schema["name_in_destination"],
+                authority="",
+                connection_url=BaseExtractor.get_connection_uri(hook.fivetran_conn),
             )
 
-        """
-        inputs = [
-            Dataset(
-                source=source,
-                name="",
-            ) for schema in schema_resp["schemas"]
-        ]
-        """
-
-        outputs = [
-            Dataset(
-                source=source,
-                name=table["name_in_destination"],
-                fields=self._get_fields(table),
+            inputs.append(
+                Dataset(
+                    source=source,
+                    name=input_name,
+                )
             )
-            for table in schema["tables"]
-        ]
+
+            outputs.extend([
+                Dataset(
+                    source=source,
+                    name=table["name_in_destination"],
+                    fields=self._get_fields(table),
+                )
+                for table in schema["tables"].values()
+            ])
 
         job_facets = {}
         run_facets = {}
 
-        facets.inputs = []  # [ds.to_openlineage_dataset() for ds in inputs]
+        facets.inputs = [ds.to_openlineage_dataset() for ds in inputs]
         facets.outputs = [ds.to_openlineage_dataset() for ds in outputs]
         facets.job_facets = job_facets
         facets.run_facets = run_facets
