@@ -3,6 +3,9 @@
 ## Upcoming 
 * (please add here)
 
+## [2.0.0]
+Added OpenLineage default extractor methods to the operator and updated Airflow version requirement to apache-airflow >= 2.1.0 
+
 ## [1.1.3](https://github.com/fivetran/airflow-provider-fivetran/releases/tag/v1.1.3) - 2022-12-12
 Added ability to test a Fivetran Connection type
 
