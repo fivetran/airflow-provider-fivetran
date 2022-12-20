@@ -126,53 +126,6 @@ class TestFivetranOperator(unittest.TestCase):
 
         assert result["code"] == "Success"
 
-    @requests_mock.mock()
-    def test_fivetran_operator_get_openlineage_facets_on_complete(self, m):
-        m.get(
-            "https://api.fivetran.com/v1/connectors/interchangeable_revenge/schemas",
-            json=MOCK_FIVETRAN_SCHEMA_RESPONSE_PAYLOAD,
-        )
-        m.get(
-            "https://api.fivetran.com/v1/connectors/interchangeable_revenge",
-            json=MOCK_FIVETRAN_RESPONSE_PAYLOAD,
-        )
-
-        operator = FivetranOperator(
-            task_id="fivetran-task",
-            fivetran_conn_id="conn_fivetran",
-            connector_id="interchangeable_revenge",
-        )
-
-        facets = operator.get_openlineage_facets_on_complete(None)
-        assert facets.inputs[0].facets["dataSource"].name == "fivetran"
-        assert facets.inputs[0].name == "https://docs.google.com/spreadsheets/d/.../edit#gid=..."
-        field = facets.outputs[0].facets["schema"].fields[0]
-        assert field.name == "column_1"
-        assert field.type == ""
-        assert field.description is None
-
-    @requests_mock.mock()
-    def test_fivetran_operator_get_fields(self, m):
-        m.get(
-            "https://api.fivetran.com/v1/connectors/interchangeable_revenge/schemas",
-            json=MOCK_FIVETRAN_SCHEMA_RESPONSE_PAYLOAD,
-        )
-
-        operator = FivetranOperator(
-            task_id="fivetran-task",
-            fivetran_conn_id="conn_fivetran",
-            connector_id="interchangeable_revenge",
-        )
-
-        fields = operator._get_fields(
-            MOCK_FIVETRAN_SCHEMA_RESPONSE_PAYLOAD["data"]["schemas"][
-                "google_sheets.fivetran_google_sheets_spotify"
-            ]["tables"]["table_1"]
-        )
-        log.info(fields)
-
-        assert fields[0].name == "column_1"
-
 
 if __name__ == "__main__":
     unittest.main()
