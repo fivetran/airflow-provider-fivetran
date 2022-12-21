@@ -2,8 +2,6 @@ from airflow.models import BaseOperator, BaseOperatorLink
 from airflow.utils.decorators import apply_defaults
 
 from fivetran_provider.hooks.fivetran import FivetranHook
-from openlineage.airflow.extractors.base import BaseExtractor, OperatorLineage
-from openlineage.common.dataset import Dataset, Field, Source
 from typing import Optional
 
 
