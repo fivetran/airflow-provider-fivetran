@@ -173,7 +173,7 @@ class FivetranHook(BaseHook):
         :param connector_id: Fivetran connector_id, found in connector settings
             page in the Fivetran user interface.
         :type connector_id: str
-        :return: connector details
+        :return: schema details
         :rtype: Dict
         """
         if connector_id == "":
@@ -192,7 +192,7 @@ class FivetranHook(BaseHook):
         :type connector_id: str
         :param metadata: The string to return the type of metadata from the API
         :type metadata: str
-        :return: connector details
+        :return: table or column metadata details
         :rtype: Dict
         """
         metadata_values = ("tables", "columns")
@@ -212,7 +212,7 @@ class FivetranHook(BaseHook):
         Fetches destination information for the given group.
         :param group_id: The Fivetran group ID, returned by a connector API call.
         :type group_id: str
-        :return: connector details
+        :return: destination details
         :rtype: Dict
         """
         if group_id == "":
@@ -226,7 +226,7 @@ class FivetranHook(BaseHook):
         Fetches destination information for the given group.
         :param group_id: The Fivetran group ID, returned by a connector API call.
         :type group_id: str
-        :return: connector details
+        :return: group details
         :rtype: Dict
         """
         if group_id == "":
