@@ -1,7 +1,7 @@
 # Apache Airflow Provider for Fivetran
 
 ## Upcoming 
-* Added API call to hook to return connector schemas
+* (please add here)
 
 ## [1.1.3](https://github.com/fivetran/airflow-provider-fivetran/releases/tag/v1.1.3) - 2022-12-12
 Added ability to test a Fivetran Connection type
