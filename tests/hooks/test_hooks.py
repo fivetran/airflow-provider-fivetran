@@ -99,10 +99,10 @@ MOCK_FIVETRAN_METADATA_TABLES_RESPONSE_PAYLOAD = {
                 "id": "NjgyMDM0OQ",
                 "parent_id": "ZGVtbw",
                 "name_in_source": "subscription_periods",
-                "name_in_destination": "subscription_periods"
+                "name_in_destination": "subscription_periods",
             }
         ]
-    }
+    },
 }
 
 MOCK_FIVETRAN_METADATA_COLUMNS_RESPONSE_PAYLOAD = {
@@ -117,10 +117,10 @@ MOCK_FIVETRAN_METADATA_COLUMNS_RESPONSE_PAYLOAD = {
                 "type_in_source": "String",
                 "type_in_destination": "VARCHAR(256)",
                 "is_primary_key": True,
-                "is_foreign_key": False
+                "is_foreign_key": False,
             },
         ]
-    }
+    },
 }
 
 MOCK_FIVETRAN_DESTINATIONS_RESPONSE_PAYLOAD = {
@@ -132,10 +132,8 @@ MOCK_FIVETRAN_DESTINATIONS_RESPONSE_PAYLOAD = {
         "region": "GCP_US_EAST4",
         "time_zone_offset": "-8",
         "setup_status": "connected",
-        "config": {
-            "schema": "google_sheets.fivetran_google_sheets_spotify"
-        }
-    }
+        "config": {"schema": "google_sheets.fivetran_google_sheets_spotify"},
+    },
 }
 
 MOCK_FIVETRAN_GROUPS_RESPONSE_PAYLOAD = {
@@ -143,8 +141,8 @@ MOCK_FIVETRAN_GROUPS_RESPONSE_PAYLOAD = {
     "data": {
         "id": "rarer_gradient",
         "name": "GoogleSheets",
-        "created_at": "2022-12-12T17:14:33.790844Z"
-    }
+        "created_at": "2022-12-12T17:14:33.790844Z",
+    },
 }
 
 
@@ -192,7 +190,9 @@ class TestFivetranHook(unittest.TestCase):
         hook = FivetranHook(
             fivetran_conn_id="conn_fivetran",
         )
-        result = hook.get_metadata(connector_id="interchangeable_revenge", metadata="tables")
+        result = hook.get_metadata(
+            connector_id="interchangeable_revenge", metadata="tables"
+        )
         assert result["items"][0]["id"] == "NjgyMDM0OQ"
 
     @requests_mock.mock()
@@ -204,7 +204,9 @@ class TestFivetranHook(unittest.TestCase):
         hook = FivetranHook(
             fivetran_conn_id="conn_fivetran",
         )
-        result = hook.get_metadata(connector_id="interchangeable_revenge", metadata="columns")
+        result = hook.get_metadata(
+            connector_id="interchangeable_revenge", metadata="columns"
+        )
         assert result["items"][0]["id"] == "MjE0NDM2ODE2"
 
     @requests_mock.mock()

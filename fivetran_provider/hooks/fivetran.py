@@ -187,6 +187,9 @@ class FivetranHook(BaseHook):
     def get_metadata(self, connector_id, metadata) -> dict:
         """
         Fetches metadata for a given metadata string and connector.
+
+        The Fivetran metadata API is currently in beta and available to
+        all Fivetran users on the enterprise plan and above.
         :param connector_id: Fivetran connector_id, found in connector settings
             page in the Fivetran user interface.
         :type connector_id: str
@@ -201,8 +204,10 @@ class FivetranHook(BaseHook):
         if connector_id[-1] != "/":
             connector_id = connector_id + "/"
         if metadata not in metadata_values:
-            raise ValueError(f"Got {metadata} for param 'metadata', expected one"
-            f" of: {metadata_values}")
+            raise ValueError(
+                f"Got {metadata} for param 'metadata', expected one"
+                f" of: {metadata_values}"
+            )
         endpoint = f"{self.api_metadata_path_connectors}{connector_id}{metadata}"
         resp = self._do_api_call(("GET", endpoint))
         return resp["data"]
