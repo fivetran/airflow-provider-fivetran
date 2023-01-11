@@ -178,9 +178,7 @@ class FivetranHook(BaseHook):
         """
         if connector_id == "":
             raise ValueError("No value specified for connector_id")
-        if connector_id[-1] != "/":
-            connector_id = connector_id + "/"
-        endpoint = self.api_path_connectors + connector_id + "schemas"
+        endpoint = self.api_path_connectors + connector_id + "/schemas"
         resp = self._do_api_call(("GET", endpoint))
         return resp["data"]
 
@@ -201,14 +199,12 @@ class FivetranHook(BaseHook):
         metadata_values = ("tables", "columns")
         if connector_id == "":
             raise ValueError("No value specified for connector_id")
-        if connector_id[-1] != "/":
-            connector_id = connector_id + "/"
         if metadata not in metadata_values:
             raise ValueError(
                 f"Got {metadata} for param 'metadata', expected one"
                 f" of: {metadata_values}"
             )
-        endpoint = f"{self.api_metadata_path_connectors}{connector_id}{metadata}"
+        endpoint = self.api_metadata_path_connectors + connector_id + "/" + metadata
         resp = self._do_api_call(("GET", endpoint))
         return resp["data"]
 
