@@ -3,7 +3,7 @@
 ## Upcoming 
 * (please add here)
 
-## 1.1.4 
+## [1.1.4](https://github.com/fivetran/airflow-provider-fivetran/releases/tag/v1.1.4) - 2023-01-13
 Added API call to hook to return connector schemas
 
 ## [1.1.3](https://github.com/fivetran/airflow-provider-fivetran/releases/tag/v1.1.3) - 2022-12-12
