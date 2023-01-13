@@ -31,7 +31,7 @@ class FivetranHook(BaseHook):
     default_conn_name = "fivetran_default"
     conn_type = "fivetran"
     hook_name = "Fivetran"
-    api_user_agent = "airflow_provider_fivetran/1.1.3"
+    api_user_agent = "airflow_provider_fivetran/1.1.4"
     api_protocol = "https"
     api_host = "api.fivetran.com"
     api_path_connectors = "v1/connectors/"
@@ -53,6 +53,23 @@ class FivetranHook(BaseHook):
                 "password": "api secret",
             },
         }
+
+    @staticmethod
+    def _get_airflow_version() -> str:
+        """
+        Fetch and return the current Airflow version
+        from aws provider
+        https://github.com/apache/airflow/blob/main/airflow/providers/amazon/aws/hooks/base_aws.py#L486
+        """
+        try:
+            # This can be a circular import under specific configurations.
+            # Importing locally to either avoid or catch it if it does happen.
+            from airflow import __version__ as airflow_version
+
+            return "-airflow_version/" + airflow_version
+        except Exception:
+            # Under no condition should an error here ever cause an issue for the user.
+            return ""
 
     def __init__(
         self,
@@ -89,7 +106,7 @@ class FivetranHook(BaseHook):
         auth = (self.fivetran_conn.login, self.fivetran_conn.password)
         url = f"{self.api_protocol}://{self.api_host}/{endpoint}"
 
-        headers = {"User-Agent": self.api_user_agent}
+        headers = {"User-Agent": self.api_user_agent + self._get_airflow_version()}
 
         if method == "GET":
             request_func = requests.get
