@@ -356,7 +356,7 @@ class FivetranHook(BaseHook):
             last_sync = succeeded_at if succeeded_at > failed_at else failed_at
         return last_sync
 
-    def get_sync_status(self, connector_id, previous_completed_at):
+    def get_sync_status(self, connector_id, previous_completed_at, reschedule_time=0):
         """
         For sensor, return True if connector's 'succeeded_at' field has updated.
         :param connector_id: Fivetran connector_id, found in connector settings
@@ -365,9 +365,10 @@ class FivetranHook(BaseHook):
         :param previous_completed_at: The last time the connector ran, collected on Sensor
             initialization.
         :type previous_completed_at: pendulum.datetime.DateTime
+        :param reschedule_time: Optional, if connector is in reset state
+            number of seconds to wait before restarting, else Fivetran suggestion used
+        :type reschedule_time: int
         """
-        # @todo Need logic here to tell if the sync is not running at all and not
-        # likely to run in the near future.
         connector_details = self.get_connector(connector_id)
         succeeded_at = self._parse_timestamp(connector_details["succeeded_at"])
         failed_at = self._parse_timestamp(connector_details["failed_at"])
@@ -387,6 +388,19 @@ class FivetranHook(BaseHook):
         sync_state = connector_details["status"]["sync_state"]
         self.log.info(f'Connector "{connector_id}": sync_state = {sync_state}')
 
+        # if sync in resheduled start, wait for time recommended by Fivetran
+        # or manually specified, then restart sync
+        if (
+            sync_state == "rescheduled"
+            and connector_details["schedule_type"] == "manual"
+        ):
+            self.log.info(
+                f'Connector is in "rescheduled" state and needs to be manually restarted'
+            )
+            self.pause_and_restart(
+                connector_details["status"]["rescheduled_for"], reschedule_time
+            )
+            return False
         # Check if sync started by FivetranOperator has finished
         # indicated by new 'succeeded_at' timestamp
         if current_completed_at > previous_completed_at:
@@ -398,6 +412,34 @@ class FivetranHook(BaseHook):
             return True
         else:
             return False
+
+    def pause_and_restart(connector_id, reschedule_for, reschedule_time):
+        """
+        While a connector is syncing, if it falls into a reschedule state,
+        wait for a time either specified by the user of recommended by Fivetran,
+        Then restart a sync
+        :param connector_id: Fivetran connector_id, found in connector settings
+            page in the Fivetran user interface.
+        :type connector_id: str
+        :param reschedule_for: From connector details, if schedule_type is manual,
+            then the connector expects triggering the event at the designated UTC time
+        :type reschedule_for: str
+        :param reschedule_time: Optional, if connector is in reset state
+            number of seconds to wait before restarting, else Fivetran suggestion used
+        :type reschedule_time: int
+        """
+        if reschedule_time:
+            self.log.info(f'Starting connector again in "{reschedule_time}" seconds')
+            time.sleep(reschedule_time)
+        else:
+            wait_time = (
+                _parse_timestamp(reschedule_for).add(minutes=1) - pendulum.now(tz="UTC")
+            ).seconds
+            self.log.info(f'Starting connector again in "{wait_time}" seconds')
+            time.sleep(wait_time)
+
+        self.log.info("Restarting connector now")
+        return self.start_fivetran_sync(connector_id)
 
     def _parse_timestamp(self, api_time):
         """
