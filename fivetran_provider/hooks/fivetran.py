@@ -387,12 +387,19 @@ class FivetranHook(BaseHook):
 
         sync_state = connector_details["status"]["sync_state"]
         self.log.info(f'Connector "{connector_id}": sync_state = {sync_state}')
-        
-        #if sync in resheduled start, wait for time recommended by Fivetran
-        #or manually specified, then restart sync
-        if sync_state == "rescheduled" and connector_details["schedule_type"] == "manual":
-            self.log.info(f'Connector is in "rescheduled" state and needs to be manually restarted')
-            self.pause_and_restart(connector_details["status"]["rescheduled_for"], reschedule_time)
+
+        # if sync in resheduled start, wait for time recommended by Fivetran
+        # or manually specified, then restart sync
+        if (
+            sync_state == "rescheduled"
+            and connector_details["schedule_type"] == "manual"
+        ):
+            self.log.info(
+                f'Connector is in "rescheduled" state and needs to be manually restarted'
+            )
+            self.pause_and_restart(
+                connector_details["status"]["rescheduled_for"], reschedule_time
+            )
             return False
         # Check if sync started by FivetranOperator has finished
         # indicated by new 'succeeded_at' timestamp
@@ -414,7 +421,7 @@ class FivetranHook(BaseHook):
         :param connector_id: Fivetran connector_id, found in connector settings
             page in the Fivetran user interface.
         :type connector_id: str
-        :param reschedule_for: From connector details, if schedule_type is manual, 
+        :param reschedule_for: From connector details, if schedule_type is manual,
             then the connector expects triggering the event at the designated UTC time
         :type reschedule_for: str
         :param reschedule_time: Optional, if connector is in reset state
@@ -425,10 +432,12 @@ class FivetranHook(BaseHook):
             self.log.info(f'Starting connector again in "{reschedule_time}" seconds')
             time.sleep(reschedule_time)
         else:
-            wait_time = (_parse_timestamp(reschedule_for).add(minutes=1)-pendulum.now(tz='UTC')).seconds
+            wait_time = (
+                _parse_timestamp(reschedule_for).add(minutes=1) - pendulum.now(tz="UTC")
+            ).seconds
             self.log.info(f'Starting connector again in "{wait_time}" seconds')
             time.sleep(wait_time)
-        
+
         self.log.info("Restarting connector now")
         return self.start_fivetran_sync(connector_id)
 
