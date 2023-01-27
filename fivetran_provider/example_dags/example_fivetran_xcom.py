@@ -14,14 +14,13 @@ default_args = {
     "provide_context": True,
 }
 
-dag = DAG(
+
+with DAG(
     dag_id="example_fivetran_xcom",
     default_args=default_args,
     schedule_interval=timedelta(days=1),
     catchup=False,
-)
-
-with dag:
+):
     fivetran_operator = FivetranOperator(
         task_id="fivetran-operator",
         fivetran_conn_id="fivetran_default",
