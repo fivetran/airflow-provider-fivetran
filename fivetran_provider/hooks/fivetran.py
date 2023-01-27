@@ -116,7 +116,7 @@ class FivetranHook(BaseHook):
             request_func = requests.patch
             headers.update({"Content-Type": "application/json;version=2"})
         else:
-            raise AirflowException("Unexpected HTTP Method: " + method)
+            raise AirflowException(f"Unexpected HTTP Method: {method}")
 
         attempt_num = 1
         while True:
@@ -267,7 +267,7 @@ class FivetranHook(BaseHook):
         setup_state = connector_details["status"]["setup_state"]
         if setup_state != "connected":
             raise AirflowException(
-                f'Fivetran connector "{connector_id}" not correctly configured, '
+                f"Fivetran connector \"{connector_id}\" not correctly configured, "
                 f"status: {setup_state}\nPlease see: "
                 f"{self._connector_ui_url_setup(service_name, schema_name)}"
             )
