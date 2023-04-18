@@ -37,6 +37,9 @@ class FivetranSensor(BaseSensorOperator):
     :param xcom: If used, FivetranSensor receives timestamp of previously
         completed sync from FivetranOperator via XCOM
     :type xcom: str
+    :param reschedule_time: Optional, if connector is in reset state
+            number of seconds to wait before restarting, else Fivetran suggestion used
+    :type reschedule_time: int
     """
 
     # Define which fields get jinjaified
@@ -51,6 +54,7 @@ class FivetranSensor(BaseSensorOperator):
         fivetran_retry_limit: int = 3,
         fivetran_retry_delay: int = 1,
         xcom: str = "",
+        reschedule_time: int = 0,
         **kwargs: Any
     ) -> None:
         super().__init__(**kwargs)
@@ -62,6 +66,7 @@ class FivetranSensor(BaseSensorOperator):
         self.fivetran_retry_delay = fivetran_retry_delay
         self.hook = None
         self.xcom = xcom
+        self.reschedule_time = reschedule_time
 
     def _get_hook(self) -> FivetranHook:
         if self.hook is None:
@@ -78,4 +83,4 @@ class FivetranSensor(BaseSensorOperator):
             self.previous_completed_at = hook.get_last_sync(
                 self.connector_id, self.xcom
             )
-        return hook.get_sync_status(self.connector_id, self.previous_completed_at)
+        return hook.get_sync_status(self.connector_id, self.previous_completed_at, self.reschedule_time)

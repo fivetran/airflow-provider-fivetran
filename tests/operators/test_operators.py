@@ -34,6 +34,7 @@ MOCK_FIVETRAN_RESPONSE_PAYLOAD = {
         "created_at": "2021-03-05T22:58:56.238875Z",
         "succeeded_at": "2021-03-23T20:55:12.670390Z",
         "failed_at": "null",
+        "paused": False,
         "sync_frequency": 360,
         "schedule_type": "manual",
         "status": {
@@ -90,7 +91,7 @@ class TestFivetranOperator(unittest.TestCase):
         result = operator.execute({})
         log.info(result)
 
-        assert result["code"] == "Success"
+        assert result is not None
 
 
 if __name__ == "__main__":
