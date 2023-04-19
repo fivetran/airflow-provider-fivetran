@@ -1,4 +1,5 @@
 import json
+import time
 from typing import Any, Dict
 from time import sleep
 
@@ -8,7 +9,7 @@ from requests.auth import AuthBase
 import pendulum
 
 from airflow.exceptions import AirflowException
-from airflow.hooks.base_hook import BaseHook
+from airflow.hooks.base import BaseHook
 
 
 class FivetranHook(BaseHook):
@@ -445,7 +446,7 @@ class FivetranHook(BaseHook):
             time.sleep(reschedule_time)
         else:
             wait_time = (
-                _parse_timestamp(reschedule_for).add(minutes=1) - pendulum.now(tz="UTC")
+                self._parse_timestamp(reschedule_for).add(minutes=1) - pendulum.now(tz="UTC")
             ).seconds
             self.log.info(f'Starting connector again in "{wait_time}" seconds')
             time.sleep(wait_time)
