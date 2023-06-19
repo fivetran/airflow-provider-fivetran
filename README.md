@@ -1,3 +1,5 @@
+# ⚠️ Archived
+
 # Planned Deprecation Notice
 We plan on deprecating this project in favor of [Astronomer's excellent async operator](https://github.com/astronomer/airflow-provider-fivetran-async). Their provider offers multiple advanced features that [we have written about here](https://www.fivetran.com/blog/introducing-the-new-fivetran-async-provider-in-airflow). 
   
@@ -12,10 +14,6 @@ Although we plan to deprecate this project, it doesn't mean it will suddenly dis
 ## How to transition
 Please refer to Astronomer's thoughtful [step-by-step guide on utilizing their provider](https://docs.astronomer.io/learn/airflow-fivetran). If you have any additional questions, please reach out to [Fivetran support](https://support.fivetran.com/hc/en-us) or your account manager. Thank you!
 
-<br />
-<br />
-<br />
-<br />
 <br />
 <br />
 <br />
