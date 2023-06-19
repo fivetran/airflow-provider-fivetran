@@ -1,3 +1,27 @@
+# Planned Deprecation Notice
+We plan on deprecating this project in favor of [Astronomer's excellent async operator](https://github.com/astronomer/airflow-provider-fivetran-async). Their provider offers multiple advanced features that [we have written about here](https://www.fivetran.com/blog/introducing-the-new-fivetran-async-provider-in-airflow). 
+  
+In order to make this transition as seamless as possible, Astronomer has put together a [detailed guide on utilizing their provider](https://docs.astronomer.io/learn/airflow-fivetran).
+  
+## Why we're making this change
+Astronomer has built a superior provider taking advantage of things like async orchestration via deferred sensors. Rather than split our resources, we've decided to join in on their effort to better support Fivetran customers that are utilizing Airflow. 
+  
+## What this means for you
+Although we plan to deprecate this project, it doesn't mean it will suddenly disappear. However, we don't plan to provide further updates or support. We strongly recommend prioritizing a transition to Astronomer's provider to receive updates, bug fixes, and new features. 
+  
+## How to transition
+Please refer to Astronomer's thoughtful [step-by-step guide on utilizing their provider](https://docs.astronomer.io/learn/airflow-fivetran). If you have any additional questions, please reach out to [Fivetran support](https://support.fivetran.com/hc/en-us) or your account manager. Thank you!
+
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+
+## Deprecated documentation bellow
+
 # Fivetran Provider for Apache Airflow
 
 This package provides an operator, sensor, and hook that integrates [Fivetran](https://fivetran.com) into Apache Airflow. `FivetranOperator` allows you to start Fivetran jobs from Airflow and `FivetranSensor` allows you to monitor a Fivetran sync job for completion before running downstream processes.
