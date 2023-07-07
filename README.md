@@ -39,9 +39,9 @@ pip install airflow-provider-fivetran
 In the Airflow user interface, configure a Connection for Fivetran. Most of the Connection config fields will be left blank. Configure the following fields:
 
 * `Conn Id`: `fivetran_default`
-* `Conn Type`: `Fivetran`
-* `Fivetran API Key`: Your Fivetran API Key
-* `Fivetran API Secret`: Your Fivetran API Secret
+* `Conn Type`: `Fivetran` or `HTTP`
+* `Fivetran API Key` or `Login`: Your Fivetran API Key
+* `Fivetran API Secret` or `Password`: Your Fivetran API Secret
 
 Find the Fivetran API Key and Secret in the [Fivetran Account Settings](https://fivetran.com/account/settings), under the **API Config** section. See our documentation for more information on [Fivetran API Authentication](https://fivetran.com/docs/rest-api/getting-started#authentication).
 
