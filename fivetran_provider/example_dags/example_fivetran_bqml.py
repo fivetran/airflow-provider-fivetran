@@ -61,14 +61,12 @@ default_args = {
     "start_date": datetime(2021, 4, 6),
 }
 
-dag = DAG(
+with DAG(
     dag_id="example_fivetran_bqml",
     default_args=default_args,
     schedule_interval=timedelta(days=1),
     catchup=False,
-)
-
-with dag:
+):
     linkedin_sync = FivetranOperator(
         task_id="linkedin-sync",
         fivetran_conn_id="fivetran_default",
