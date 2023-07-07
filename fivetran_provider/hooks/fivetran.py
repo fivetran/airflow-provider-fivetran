@@ -113,6 +113,7 @@ class FivetranHook(BaseHook):
             request_func = requests.get
         elif method == "POST":
             request_func = requests.post
+            headers.update({"Content-Type": "application/json;version=2"})
         elif method == "PATCH":
             request_func = requests.patch
             headers.update({"Content-Type": "application/json;version=2"})
